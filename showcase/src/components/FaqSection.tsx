@@ -43,19 +43,19 @@ export const FaqSection: React.FC = () => {
   };
 
   return (
-    <section className="py-20 md:py-28 bg-[#0F1422] border-t border-slate-800/80">
+    <section className="py-20 md:py-28 bg-slate-50 border-t border-slate-200">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Section Header */}
         <div className="text-center space-y-4 mb-16">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800 border border-slate-700 text-slate-300 text-xs font-semibold">
-            <HelpCircle className="w-3.5 h-3.5 text-indigo-400" />
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-pastel-blue-50 border border-pastel-blue-200 text-pastel-blue-700 text-xs font-bold shadow-sm">
+            <HelpCircle className="w-3.5 h-3.5 text-pastel-orange-500" />
             <span>자주 묻는 질문 (FAQ)</span>
           </div>
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
             궁금한 점을 모두 답해드립니다
           </h2>
-          <p className="text-slate-400 text-sm sm:text-base">
+          <p className="text-slate-600 text-sm sm:text-base">
             법적 컴플라이언스부터 기술 아키텍처 및 도입 절차까지 투명하게 공개합니다.
           </p>
         </div>
@@ -67,27 +67,27 @@ export const FaqSection: React.FC = () => {
             return (
               <div
                 key={index}
-                className="glass-card rounded-2xl border border-slate-800 overflow-hidden transition-all duration-200"
+                className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden transition-all duration-200 hover:border-pastel-blue-300"
               >
                 <button
                   onClick={() => toggleFaq(index)}
-                  className="w-full px-6 py-5 text-left flex items-center justify-between gap-4 hover:bg-slate-800/40 transition-colors"
+                  className="w-full px-6 py-5 text-left flex items-center justify-between gap-4 hover:bg-pastel-blue-50/30 transition-colors cursor-pointer"
                 >
                   <div className="space-y-1">
-                    <span className="text-[11px] font-bold text-indigo-400 uppercase tracking-wider block">
+                    <span className="text-[11px] font-bold text-pastel-blue-700 uppercase tracking-wider block">
                       {faq.category}
                     </span>
-                    <h3 className="text-base font-bold text-white leading-snug">
+                    <h3 className="text-base font-bold text-slate-900 leading-snug">
                       {faq.question}
                     </h3>
                   </div>
-                  <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center shrink-0 text-slate-400">
-                    {isOpen ? <ChevronUp className="w-4 h-4 text-indigo-400" /> : <ChevronDown className="w-4 h-4" />}
+                  <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center shrink-0 text-slate-600">
+                    {isOpen ? <ChevronUp className="w-4 h-4 text-pastel-blue-600" /> : <ChevronDown className="w-4 h-4" />}
                   </div>
                 </button>
 
                 {isOpen && (
-                  <div className="px-6 pb-6 pt-2 text-sm text-slate-300 leading-relaxed border-t border-slate-800/60 bg-slate-950/40 animate-fadeIn">
+                  <div className="px-6 pb-6 pt-3 text-sm text-slate-600 leading-relaxed border-t border-slate-100 bg-pastel-blue-50/20 animate-fadeIn">
                     {faq.answer}
                   </div>
                 )}

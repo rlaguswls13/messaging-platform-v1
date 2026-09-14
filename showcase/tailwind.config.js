@@ -7,31 +7,49 @@ export default {
   theme: {
     extend: {
       colors: {
-        brand: {
-          50: '#eef2ff',
-          100: '#e0e7ff',
-          500: '#6366f1',
-          600: '#4f46e5',
-          700: '#4338ca',
+        pastel: {
+          blue: {
+            50: '#F0F7FF',
+            100: '#E0EFFF',
+            200: '#BAE0FD',
+            300: '#7CC5FB',
+            400: '#38A3F8',
+            500: '#0E87EA',
+            600: '#026BC7',
+            700: '#0355A1',
+          },
+          orange: {
+            50: '#FFF8F1',
+            100: '#FEECDC',
+            200: '#FCD9BD',
+            300: '#FDBA8C',
+            400: '#FA8C42',
+            500: '#F16514',
+            600: '#D44A08',
+            700: '#A63408',
+          }
         },
-        dark: {
-          bg: '#0B0F19',
-          card: '#111827',
-          border: '#1F2937',
-          hover: '#1E293B',
+        surface: {
+          50: '#F8FAFC',
+          100: '#F1F5F9',
+          200: '#E2E8F0',
+          300: '#CBD5E1',
+          card: '#FFFFFF',
+          border: '#E2E8F0',
         }
       },
       animation: {
         'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-        'glow': 'glow 2s ease-in-out infinite alternate',
+        'float': 'float 4s ease-in-out infinite alternate',
       },
       keyframes: {
-        glow: {
-          '0%': { boxShadow: '0 0 15px rgba(99, 102, 241, 0.3)' },
-          '100%': { boxShadow: '0 0 30px rgba(139, 92, 246, 0.6)' },
+        float: {
+          '0%': { transform: 'translateY(0px)' },
+          '100%': { transform: 'translateY(-8px)' },
         }
       }
     },
   },
   plugins: [],
 }
+
