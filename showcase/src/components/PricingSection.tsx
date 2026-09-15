@@ -1,8 +1,13 @@
 import React, { useState } from 'react';
-import { Check, Sparkles, Shield, Zap, ArrowRight, Users, Calculator, MessageSquare, Mail, Bell, Smartphone, HelpCircle, Layers } from 'lucide-react';
+import {
+  Check, Sparkles, Shield, Zap, ArrowRight, Users, Calculator,
+  MessageSquare, Mail, Bell, Smartphone, HelpCircle, Layers,
+  Globe, Server, Radio, HardDrive, Info, ExternalLink, RefreshCw, Cpu
+} from 'lucide-react';
 
 export const PricingSection: React.FC = () => {
   const [isYearly, setIsYearly] = useState<boolean>(false);
+  const [channelTab, setChannelTab] = useState<'domestic' | 'global_future'>('domestic');
 
   // Calculator states
   const [teamSeats, setTeamSeats] = useState<number>(5);
@@ -10,12 +15,15 @@ export const PricingSection: React.FC = () => {
   const [emailCount, setEmailCount] = useState<number>(20000);
   const [smsCount, setSmsCount] = useState<number>(1000);
   const [pushCount, setPushCount] = useState<number>(30000);
+  const [lineMode, setLineMode] = useState<'byo' | 'managed'>('byo');
+  const [lineCount, setLineCount] = useState<number>(2000);
 
   // Rate constants
   const EMAIL_RATE = 1.5;
   const PUSH_RATE = 0.2;
   const ALIMTALK_RATE = 8.5;
   const SMS_RATE = 9.8;
+  const LINE_MANAGED_RATE = 3.0;
 
   // Plan recommendation logic
   const getRecommendedPlan = () => {
@@ -26,6 +34,8 @@ export const PricingSection: React.FC = () => {
         freeEmails: 300000,
         freePush: 1000000,
         freeAlimtalk: 30000,
+        trafficIncludedGB: 9999, // Unlimited
+        trafficText: '전용망 무제한 대역폭',
         seatsIncluded: '전사 무제한',
       };
     } else if (teamSeats > 5 || alimtalkCount > 10000 || emailCount > 50000) {
@@ -35,6 +45,8 @@ export const PricingSection: React.FC = () => {
         freeEmails: 100000,
         freePush: 200000,
         freeAlimtalk: 10000,
+        trafficIncludedGB: 300,
+        trafficText: 'AWS 트래픽 300GB 번들',
         seatsIncluded: '20인 기본 포함',
       };
     } else if (teamSeats > 1 || alimtalkCount > 0 || emailCount > 0) {
@@ -44,6 +56,8 @@ export const PricingSection: React.FC = () => {
         freeEmails: 20000,
         freePush: 50000,
         freeAlimtalk: 0,
+        trafficIncludedGB: 50,
+        trafficText: 'AWS 트래픽 50GB 번들',
         seatsIncluded: '5인 기본 포함',
       };
     } else {
@@ -53,6 +67,8 @@ export const PricingSection: React.FC = () => {
         freeEmails: 0,
         freePush: 0,
         freeAlimtalk: 0,
+        trafficIncludedGB: 5,
+        trafficText: 'AWS 트래픽 5GB 번들',
         seatsIncluded: '1인 단독',
       };
     }
@@ -69,8 +85,15 @@ export const PricingSection: React.FC = () => {
   const pushCost = billablePush * PUSH_RATE;
   const alimtalkCost = billableAlimtalk * ALIMTALK_RATE;
   const smsCost = smsCount * SMS_RATE;
+  const lineCost = lineMode === 'byo' ? 0 : lineCount * LINE_MANAGED_RATE;
 
-  const totalSendingCost = Math.round(emailCost + pushCost + alimtalkCost + smsCost);
+  // AWS Egress traffic estimation (Email ~25KB, Push ~2KB, Alimtalk ~5KB, SMS ~1KB, LINE ~5KB)
+  const totalKB = (emailCount * 25) + (pushCount * 2) + (alimtalkCount * 5) + (smsCount * 1) + (lineCount * 5);
+  const estimatedTrafficGB = Math.max(0.1, Number((totalKB / (1024 * 1024)).toFixed(2)));
+  const billableTrafficGB = Math.max(0, estimatedTrafficGB - recPlan.trafficIncludedGB);
+  const trafficCost = Math.round(billableTrafficGB * 150); // AWS Seoul Egress ~150원/GB
+
+  const totalSendingCost = Math.round(emailCost + pushCost + alimtalkCost + smsCost + lineCost + trafficCost);
   const totalMonthlyCost = recPlan.basePrice + totalSendingCost;
 
   return (
@@ -153,8 +176,8 @@ export const PricingSection: React.FC = () => {
                   <span className="text-slate-900 font-bold">0.2원</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-600">LINE 메시지</span>
-                  <span className="text-pastel-blue-600 font-bold">무료 연동</span>
+                  <span className="text-slate-600">LINE (BYO 키 연동)</span>
+                  <span className="text-emerald-600 font-bold">0원 (무료)</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-600">카카오 알림톡</span>
@@ -170,6 +193,10 @@ export const PricingSection: React.FC = () => {
                 <div className="flex items-center gap-2">
                   <Check className="w-4 h-4 text-pastel-blue-600 shrink-0" />
                   <span>2nd Brain AI 규제 린터 기본 무료</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Check className="w-4 h-4 text-pastel-blue-600 shrink-0" />
+                  <span>AWS 아웃바운드 트래픽 5GB 번들 제공</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Check className="w-4 h-4 text-pastel-blue-600 shrink-0" />
@@ -229,12 +256,16 @@ export const PricingSection: React.FC = () => {
                   <span className="text-pastel-blue-700 font-bold">50,000건 무료</span>
                 </div>
                 <div className="flex justify-between">
+                  <span className="text-slate-600">AWS 트래픽 번들</span>
+                  <span className="text-emerald-700 font-bold">50GB 무료</span>
+                </div>
+                <div className="flex justify-between">
                   <span className="text-slate-600">알림톡 ➔ 문자</span>
                   <span className="text-pastel-orange-600 font-bold">Failover 무료</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-600">초과 알림톡/SMS</span>
-                  <span className="text-slate-800 font-bold">8.5원 / 9.8원</span>
+                  <span className="text-slate-600">LINE / Slack / Teams</span>
+                  <span className="text-pastel-blue-700 font-bold">무료 연동</span>
                 </div>
               </div>
 
@@ -280,7 +311,7 @@ export const PricingSection: React.FC = () => {
 
               <div>
                 <h3 className="text-xl font-bold text-slate-900">Business Scale</h3>
-                <p className="text-xs text-slate-500 mt-1">부서별 서브 테넌트 & LMS/친구톡 풀지원</p>
+                <p className="text-xs text-slate-500 mt-1">부서별 서브 테넌트 & LMS/친구톡/확장 채널 풀지원</p>
               </div>
 
               <div className="flex items-baseline gap-1 text-slate-900">
@@ -309,7 +340,11 @@ export const PricingSection: React.FC = () => {
                   <span className="text-pastel-orange-600 font-bold">10,000건 무료</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-600">친구톡 / LMS / MMS</span>
+                  <span className="text-slate-600">AWS 트래픽 번들</span>
+                  <span className="text-emerald-700 font-bold">300GB 무료</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-600">친구톡 / LMS / RCS</span>
                   <span className="text-slate-900 font-bold">전 채널 연동</span>
                 </div>
               </div>
@@ -375,12 +410,12 @@ export const PricingSection: React.FC = () => {
                   <span className="text-emerald-700 font-bold">테이블 완전 분리</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-600">사내망 릴레이 Agent</span>
-                  <span className="text-emerald-700 font-bold">평문 반출 0%</span>
+                  <span className="text-slate-600">네트워크 대역폭</span>
+                  <span className="text-emerald-700 font-bold">전용망 무제한</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-600">전용 고정 IP</span>
-                  <span className="text-emerald-700 font-bold">Dedicated IP 배정</span>
+                  <span className="text-emerald-700 font-bold">Dedicated IP 2개</span>
                 </div>
               </div>
 
@@ -408,6 +443,58 @@ export const PricingSection: React.FC = () => {
             </a>
           </div>
 
+        </div>
+
+        {/* AWS Traffic & LINE API Value Analysis Box */}
+        <div className="max-w-5xl mx-auto mb-20 bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-xl overflow-hidden">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
+            
+            {/* Value Card 1: AWS Egress Economics */}
+            <div className="p-5 rounded-2xl bg-gradient-to-br from-pastel-blue-50/60 to-white border border-pastel-blue-100 space-y-3">
+              <div className="w-9 h-9 rounded-xl bg-pastel-blue-500 text-white flex items-center justify-center shadow-sm">
+                <Server className="w-5 h-5" />
+              </div>
+              <h4 className="text-base font-black text-slate-900">AWS Egress 원가 최적화</h4>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                AWS 서울 리전 아웃바운드 트래픽(GB당 약 150원) 기준, 1건당 5~30KB 텍스트 메시지는 <strong>10만 건당 트래픽 원가가 0.003원</strong>에 불과합니다.
+                당사는 이 절감분을 고객 단가 인하로 100% 환원합니다.
+              </p>
+              <div className="pt-1 text-[11px] font-bold text-pastel-blue-700 flex items-center gap-1">
+                <span>AWS SES 대비 법령 린터 무료 통합</span>
+              </div>
+            </div>
+
+            {/* Value Card 2: LINE Messaging API Hybrid */}
+            <div className="p-5 rounded-2xl bg-gradient-to-br from-emerald-50/60 to-white border border-emerald-100 space-y-3">
+              <div className="w-9 h-9 rounded-xl bg-emerald-500 text-white flex items-center justify-center shadow-sm">
+                <MessageSquare className="w-5 h-5" />
+              </div>
+              <h4 className="text-base font-black text-slate-900">LINE API 하이브리드 연동</h4>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                고객사의 LINE Developers 채널 키를 직접 등록(BYO)하면 <strong>플랫폼 수수료 0원</strong>으로 연동됩니다.
+                LINE 본사의 무료 발송 쿼터(월 200~30,000건)를 온전히 보존하며, 일본/동남아 진출을 손쉽게 지원합니다.
+              </p>
+              <div className="pt-1 text-[11px] font-bold text-emerald-700 flex items-center gap-1">
+                <span>자체 채널 없을 시 대행 3.0원 지원</span>
+              </div>
+            </div>
+
+            {/* Value Card 3: Modular Harness Scalability */}
+            <div className="p-5 rounded-2xl bg-gradient-to-br from-pastel-orange-50/60 to-white border border-pastel-orange-100 space-y-3">
+              <div className="w-9 h-9 rounded-xl bg-pastel-orange-500 text-white flex items-center justify-center shadow-sm">
+                <Radio className="w-5 h-5" />
+              </div>
+              <h4 className="text-base font-black text-slate-900">차세대 확장 채널 플러그앤플레이</h4>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Meta의 <strong>WhatsApp Cloud API</strong>(24h 세션 과금), 통신 3사의 <strong>차세대 RCS Biz 메시징</strong>, <strong>사내 Slack/Teams DevOps Webhook</strong>까지
+                하네스 어댑터를 통해 기존 요금제 변경 없이 즉시 애드온됩니다.
+              </p>
+              <div className="pt-1 text-[11px] font-bold text-pastel-orange-700 flex items-center gap-1">
+                <span>채널 추가 시 코드 수정 0줄 보장</span>
+              </div>
+            </div>
+
+          </div>
         </div>
 
         {/* Team Collaboration & Multi-Channel Visual Showcase */}
@@ -566,6 +653,44 @@ export const PricingSection: React.FC = () => {
                 />
               </div>
 
+              {/* Toggle 5: LINE Mode */}
+              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+                <div className="flex items-center justify-between text-xs font-bold text-slate-700">
+                  <span className="flex items-center gap-1.5">
+                    <MessageSquare className="w-3.5 h-3.5 text-emerald-600" />
+                    LINE 연동 모드
+                  </span>
+                  <div className="flex rounded-lg bg-slate-200 p-0.5 text-[11px]">
+                    <button
+                      onClick={() => setLineMode('byo')}
+                      className={`px-2 py-0.5 rounded-md font-bold transition-all cursor-pointer ${lineMode === 'byo' ? 'bg-white text-emerald-700 shadow-xs' : 'text-slate-500'}`}
+                    >
+                      BYO 키 (0원)
+                    </button>
+                    <button
+                      onClick={() => setLineMode('managed')}
+                      className={`px-2 py-0.5 rounded-md font-bold transition-all cursor-pointer ${lineMode === 'managed' ? 'bg-white text-pastel-orange-700 shadow-xs' : 'text-slate-500'}`}
+                    >
+                      대행 발송 (3원)
+                    </button>
+                  </div>
+                </div>
+                {lineMode === 'managed' && (
+                  <div className="pt-1 flex items-center justify-between text-xs">
+                    <span className="text-slate-500">대행 발송량: {lineCount.toLocaleString()}건</span>
+                    <input
+                      type="range"
+                      min="0"
+                      max="20000"
+                      step="1000"
+                      value={lineCount}
+                      onChange={(e) => setLineCount(Number(e.target.value))}
+                      className="w-32 h-1.5 bg-slate-200 rounded appearance-none cursor-pointer accent-emerald-500"
+                    />
+                  </div>
+                )}
+              </div>
+
             </div>
 
             {/* Right: Realtime Cost Breakdown Card */}
@@ -596,6 +721,24 @@ export const PricingSection: React.FC = () => {
                   <span className="font-bold text-slate-900">{Math.round(smsCost).toLocaleString()}원</span>
                 </div>
 
+                {lineMode === 'managed' && (
+                  <div className="flex justify-between text-slate-600">
+                    <span>LINE 대행 발송료 ({lineCount.toLocaleString()}건)</span>
+                    <span className="font-bold text-emerald-700">{Math.round(lineCost).toLocaleString()}원</span>
+                  </div>
+                )}
+
+                {/* Traffic Egress Status */}
+                <div className="flex justify-between text-slate-600 border-t border-slate-200/80 pt-2">
+                  <span className="flex items-center gap-1">
+                    <HardDrive className="w-3.5 h-3.5 text-pastel-blue-500" />
+                    AWS Egress 트래픽 ({estimatedTrafficGB}GB / 번들 {recPlan.trafficIncludedGB === 9999 ? '무제한' : `${recPlan.trafficIncludedGB}GB`})
+                  </span>
+                  <span className="font-bold text-emerald-700">
+                    {trafficCost > 0 ? `+${trafficCost.toLocaleString()}원` : '100% 무료 포함'}
+                  </span>
+                </div>
+
                 <div className="flex justify-between text-emerald-700 font-semibold border-t border-slate-200/80 pt-2">
                   <span>2nd Brain AI 규제 린터 & 템플릿</span>
                   <span>기본 100% 무료</span>
@@ -617,104 +760,216 @@ export const PricingSection: React.FC = () => {
           </div>
         </div>
 
-        {/* Channel Rate Matrix Table */}
+        {/* Dual-Tab Channel Rate Matrix Table */}
         <div className="max-w-5xl mx-auto space-y-6">
-          <div className="text-center space-y-2">
-            <h3 className="text-xl font-bold text-slate-900">전 채널 건당 단가 및 발송 사양 투명 공개</h3>
-            <p className="text-xs text-slate-500">숨겨진 수수료나 복잡한 초기 연동비 없이 100% 투명하게 정산됩니다.</p>
+          <div className="text-center space-y-3">
+            <h3 className="text-xl sm:text-2xl font-bold text-slate-900">전 채널 건당 단가 및 발송 사양 투명 공개</h3>
+            <p className="text-xs sm:text-sm text-slate-500">
+              국내 표준 채널뿐만 아니라 글로벌 메신저와 차세대 통신 채널까지 숨겨진 비용 없이 투명하게 제공합니다.
+            </p>
+
+            {/* Category Switcher Tabs */}
+            <div className="inline-flex rounded-2xl bg-slate-200/70 p-1 border border-slate-300/80 text-xs font-bold">
+              <button
+                onClick={() => setChannelTab('domestic')}
+                className={`px-4 py-2 rounded-xl transition-all cursor-pointer ${
+                  channelTab === 'domestic'
+                    ? 'bg-white text-pastel-blue-700 shadow-sm'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                🇰🇷 국내 표준 채널 (이메일·푸시·알림톡·친구톡·문자)
+              </button>
+              <button
+                onClick={() => setChannelTab('global_future')}
+                className={`px-4 py-2 rounded-xl transition-all cursor-pointer ${
+                  channelTab === 'global_future'
+                    ? 'bg-white text-pastel-orange-700 shadow-sm'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                🌐 글로벌 & 차세대 확장 채널 (LINE·WhatsApp·RCS·DevOps)
+              </button>
+            </div>
           </div>
 
-          <div className="overflow-x-auto rounded-2xl border border-slate-200 shadow-sm bg-white">
-            <table className="w-full text-left text-xs text-slate-700">
-              <thead className="bg-slate-50 text-slate-500 font-bold border-b border-slate-200">
-                <tr>
-                  <th className="py-3.5 px-4">발송 채널</th>
-                  <th className="py-3.5 px-4">건당 단가</th>
-                  <th className="py-3.5 px-4">발송 엔진 & 기술 규격</th>
-                  <th className="py-3.5 px-4">2nd Brain 규제 검증</th>
-                  <th className="py-3.5 px-4">자동 Failover</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                <tr className="hover:bg-pastel-blue-50/40 transition-colors">
-                  <td className="py-3 px-4 font-bold text-slate-900 flex items-center gap-2">
-                    <Mail className="w-4 h-4 text-pastel-blue-600" />
-                    자체 이메일 (SMTP)
-                  </td>
-                  <td className="py-3 px-4 text-pastel-blue-700 font-black">1.5원</td>
-                  <td className="py-3 px-4 text-slate-600">Netty TCP Port 25 리액티브 엔진 (초당 5.4만 건)</td>
-                  <td className="py-3 px-4 text-emerald-600 font-bold">080 무료수신거부 자동 인젝션</td>
-                  <td className="py-3 px-4 text-slate-400">-</td>
-                </tr>
+          {/* Table: Domestic Standard */}
+          {channelTab === 'domestic' && (
+            <div className="overflow-x-auto rounded-2xl border border-slate-200 shadow-sm bg-white">
+              <table className="w-full text-left text-xs text-slate-700">
+                <thead className="bg-slate-50 text-slate-500 font-bold border-b border-slate-200">
+                  <tr>
+                    <th className="py-3.5 px-4">발송 채널</th>
+                    <th className="py-3.5 px-4">건당 단가</th>
+                    <th className="py-3.5 px-4">발송 엔진 & 기술 규격</th>
+                    <th className="py-3.5 px-4">2nd Brain 규제 검증</th>
+                    <th className="py-3.5 px-4">자동 Failover</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  <tr className="hover:bg-pastel-blue-50/40 transition-colors">
+                    <td className="py-3 px-4 font-bold text-slate-900 flex items-center gap-2">
+                      <Mail className="w-4 h-4 text-pastel-blue-600" />
+                      자체 이메일 (SMTP)
+                    </td>
+                    <td className="py-3 px-4 text-pastel-blue-700 font-black">1.5원</td>
+                    <td className="py-3 px-4 text-slate-600">Netty TCP Port 25 리액티브 엔진 (초당 5.4만 건)</td>
+                    <td className="py-3 px-4 text-emerald-600 font-bold">080 무료수신거부 자동 인젝션</td>
+                    <td className="py-3 px-4 text-slate-400">-</td>
+                  </tr>
 
-                <tr className="hover:bg-pastel-blue-50/40 transition-colors">
-                  <td className="py-3 px-4 font-bold text-slate-900 flex items-center gap-2">
-                    <Bell className="w-4 h-4 text-purple-600" />
-                    앱 푸시 Custom Object
-                  </td>
-                  <td className="py-3 px-4 text-pastel-blue-700 font-black">0.2원</td>
-                  <td className="py-3 px-4 text-slate-600">FCM v1 / APNs HTTP/2 비동기 멀티플렉싱</td>
-                  <td className="py-3 px-4 text-emerald-600 font-bold">야간 발송(21시~08시) 자동 차단</td>
-                  <td className="py-3 px-4 text-slate-600">미수신 시 알림톡 전환</td>
-                </tr>
+                  <tr className="hover:bg-pastel-blue-50/40 transition-colors">
+                    <td className="py-3 px-4 font-bold text-slate-900 flex items-center gap-2">
+                      <Bell className="w-4 h-4 text-purple-600" />
+                      앱 푸시 Custom Object
+                    </td>
+                    <td className="py-3 px-4 text-pastel-blue-700 font-black">0.2원</td>
+                    <td className="py-3 px-4 text-slate-600">FCM v1 / APNs HTTP/2 비동기 멀티플렉싱</td>
+                    <td className="py-3 px-4 text-emerald-600 font-bold">야간 발송(21시~08시) 자동 차단</td>
+                    <td className="py-3 px-4 text-slate-600">미수신 시 알림톡 전환</td>
+                  </tr>
 
-                <tr className="hover:bg-pastel-blue-50/40 transition-colors">
-                  <td className="py-3 px-4 font-bold text-slate-900 flex items-center gap-2">
-                    <MessageSquare className="w-4 h-4 text-emerald-500" />
-                    LINE 메시징
-                  </td>
-                  <td className="py-3 px-4 text-emerald-600 font-black">무료 (0원)</td>
-                  <td className="py-3 px-4 text-slate-600">LINE Developers 공식 채널 오픈 API 직연동</td>
-                  <td className="py-3 px-4 text-emerald-600 font-bold">플랫폼 규정 자동 정합</td>
-                  <td className="py-3 px-4 text-slate-400">-</td>
-                </tr>
+                  <tr className="hover:bg-pastel-blue-50/40 transition-colors">
+                    <td className="py-3 px-4 font-bold text-slate-900 flex items-center gap-2">
+                      <MessageSquare className="w-4 h-4 text-amber-500" />
+                      카카오 알림톡
+                    </td>
+                    <td className="py-3 px-4 text-slate-900 font-black">8.5원</td>
+                    <td className="py-3 px-4 text-slate-600">공식 서드파티 B2B 파트너 API ➔ 자체 Agent 직연동</td>
+                    <td className="py-3 px-4 text-emerald-600 font-bold">카카오 검수 반려율 0% (사전 린터)</td>
+                    <td className="py-3 px-4 text-pastel-orange-600 font-bold">문자(SMS) 자동 폴백</td>
+                  </tr>
 
-                <tr className="hover:bg-pastel-blue-50/40 transition-colors">
-                  <td className="py-3 px-4 font-bold text-slate-900 flex items-center gap-2">
-                    <MessageSquare className="w-4 h-4 text-amber-500" />
-                    카카오 알림톡
-                  </td>
-                  <td className="py-3 px-4 text-slate-900 font-black">8.5원</td>
-                  <td className="py-3 px-4 text-slate-600">공식 서드파티 B2B 파트너 API ➔ 자체 Agent 직연동</td>
-                  <td className="py-3 px-4 text-emerald-600 font-bold">카카오 검수 반려율 0% (사전 린터)</td>
-                  <td className="py-3 px-4 text-pastel-orange-600 font-bold">문자(SMS) 자동 폴백</td>
-                </tr>
+                  <tr className="hover:bg-pastel-blue-50/40 transition-colors">
+                    <td className="py-3 px-4 font-bold text-slate-900 flex items-center gap-2">
+                      <MessageSquare className="w-4 h-4 text-amber-600" />
+                      카카오 친구톡
+                    </td>
+                    <td className="py-3 px-4 text-slate-900 font-black">14.5원</td>
+                    <td className="py-3 px-4 text-slate-600">와이드 이미지 및 다중 인터랙티브 버튼 지원</td>
+                    <td className="py-3 px-4 text-emerald-600 font-bold">(광고) 표기 및 수신거부 슬롯 강제</td>
+                    <td className="py-3 px-4 text-pastel-orange-600 font-bold">LMS 장문 자동 폴백</td>
+                  </tr>
 
-                <tr className="hover:bg-pastel-blue-50/40 transition-colors">
-                  <td className="py-3 px-4 font-bold text-slate-900 flex items-center gap-2">
-                    <MessageSquare className="w-4 h-4 text-amber-600" />
-                    카카오 친구톡
-                  </td>
-                  <td className="py-3 px-4 text-slate-900 font-black">14.5원</td>
-                  <td className="py-3 px-4 text-slate-600">와이드 이미지 및 다중 인터랙티브 버튼 지원</td>
-                  <td className="py-3 px-4 text-emerald-600 font-bold">(광고) 표기 및 수신거부 슬롯 강제</td>
-                  <td className="py-3 px-4 text-pastel-orange-600 font-bold">LMS 장문 자동 폴백</td>
-                </tr>
+                  <tr className="hover:bg-pastel-blue-50/40 transition-colors">
+                    <td className="py-3 px-4 font-bold text-slate-900 flex items-center gap-2">
+                      <Smartphone className="w-4 h-4 text-pastel-orange-600" />
+                      통신사 SMS (단문)
+                    </td>
+                    <td className="py-3 px-4 text-slate-900 font-black">9.8원</td>
+                    <td className="py-3 px-4 text-slate-600">90바이트 이하 즉시 전송, 이동통신 3사 망 연결</td>
+                    <td className="py-3 px-4 text-emerald-600 font-bold">정보통신망법 50조 자동 규제</td>
+                    <td className="py-3 px-4 text-slate-400">-</td>
+                  </tr>
 
-                <tr className="hover:bg-pastel-blue-50/40 transition-colors">
-                  <td className="py-3 px-4 font-bold text-slate-900 flex items-center gap-2">
-                    <Smartphone className="w-4 h-4 text-pastel-orange-600" />
-                    통신사 SMS (단문)
-                  </td>
-                  <td className="py-3 px-4 text-slate-900 font-black">9.8원</td>
-                  <td className="py-3 px-4 text-slate-600">90바이트 이하 즉시 전송, 이동통신 3사 망 연결</td>
-                  <td className="py-3 px-4 text-emerald-600 font-bold">정보통신망법 50조 자동 규제</td>
-                  <td className="py-3 px-4 text-slate-400">-</td>
-                </tr>
+                  <tr className="hover:bg-pastel-blue-50/40 transition-colors">
+                    <td className="py-3 px-4 font-bold text-slate-900 flex items-center gap-2">
+                      <Smartphone className="w-4 h-4 text-pastel-orange-700" />
+                      통신사 LMS (장문)
+                    </td>
+                    <td className="py-3 px-4 text-slate-900 font-black">29.0원</td>
+                    <td className="py-3 px-4 text-slate-600">최대 2,000바이트 장문 안내 및 상세 이벤트 공지</td>
+                    <td className="py-3 px-4 text-emerald-600 font-bold">080 무료수신거부 필수 삽입</td>
+                    <td className="py-3 px-4 text-slate-400">-</td>
+                  </tr>
 
-                <tr className="hover:bg-pastel-blue-50/40 transition-colors">
-                  <td className="py-3 px-4 font-bold text-slate-900 flex items-center gap-2">
-                    <Smartphone className="w-4 h-4 text-pastel-orange-700" />
-                    통신사 LMS (장문)
-                  </td>
-                  <td className="py-3 px-4 text-slate-900 font-black">29.0원</td>
-                  <td className="py-3 px-4 text-slate-600">최대 2,000바이트 장문 안내 및 상세 이벤트 공지</td>
-                  <td className="py-3 px-4 text-emerald-600 font-bold">080 무료수신거부 필수 삽입</td>
-                  <td className="py-3 px-4 text-slate-400">-</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+                  <tr className="hover:bg-pastel-blue-50/40 transition-colors">
+                    <td className="py-3 px-4 font-bold text-slate-900 flex items-center gap-2">
+                      <Smartphone className="w-4 h-4 text-purple-700" />
+                      통신사 MMS (포토)
+                    </td>
+                    <td className="py-3 px-4 text-slate-900 font-black">65.0원</td>
+                    <td className="py-3 px-4 text-slate-600">최대 3장 고화질 이미지 + 2,000바이트 텍스트 첨부</td>
+                    <td className="py-3 px-4 text-emerald-600 font-bold">이미지 내 광고 표기 슬롯 린팅</td>
+                    <td className="py-3 px-4 text-slate-400">-</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {/* Table: Global & Future Channels */}
+          {channelTab === 'global_future' && (
+            <div className="overflow-x-auto rounded-2xl border border-slate-200 shadow-sm bg-white">
+              <table className="w-full text-left text-xs text-slate-700">
+                <thead className="bg-slate-50 text-slate-500 font-bold border-b border-slate-200">
+                  <tr>
+                    <th className="py-3.5 px-4">발송 채널</th>
+                    <th className="py-3.5 px-4">요금 정책 & 단가</th>
+                    <th className="py-3.5 px-4">연동 방식 / 과금 모델</th>
+                    <th className="py-3.5 px-4">2nd Brain 특화 지원</th>
+                    <th className="py-3.5 px-4">특화 기능</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  <tr className="hover:bg-pastel-blue-50/40 transition-colors">
+                    <td className="py-3 px-4 font-bold text-slate-900 flex items-center gap-2">
+                      <MessageSquare className="w-4 h-4 text-emerald-500" />
+                      LINE Messaging API
+                    </td>
+                    <td className="py-3 px-4 text-emerald-600 font-black">
+                      BYO 무료 (0원) / 대행 3.0원
+                    </td>
+                    <td className="py-3 px-4 text-slate-600">LINE Developers 공식 채널 키 등록 (공식 무료 쿼터 100% 보존)</td>
+                    <td className="py-3 px-4 text-emerald-600 font-bold">Flex/Carousel 템플릿 검증</td>
+                    <td className="py-3 px-4 text-slate-600">일본/동남아 즉시 발송</td>
+                  </tr>
+
+                  <tr className="hover:bg-pastel-blue-50/40 transition-colors">
+                    <td className="py-3 px-4 font-bold text-slate-900 flex items-center gap-2">
+                      <Globe className="w-4 h-4 text-emerald-600" />
+                      WhatsApp Business (Cloud API)
+                    </td>
+                    <td className="py-3 px-4 text-slate-900 font-bold">
+                      응대 무료 / 인증 14원 / 알림 20원 / 마케팅 38원
+                    </td>
+                    <td className="py-3 px-4 text-slate-600">Meta 공식 24시간 세션 기반(Conversation-based) 과금</td>
+                    <td className="py-3 px-4 text-emerald-600 font-bold">Meta 템플릿 사전 규격 검사</td>
+                    <td className="py-3 px-4 text-slate-600">글로벌 180개국 직도달</td>
+                  </tr>
+
+                  <tr className="hover:bg-pastel-blue-50/40 transition-colors">
+                    <td className="py-3 px-4 font-bold text-slate-900 flex items-center gap-2">
+                      <Smartphone className="w-4 h-4 text-sky-600" />
+                      통신 3사 차세대 RCS Biz
+                    </td>
+                    <td className="py-3 px-4 text-slate-900 font-bold">
+                      텍스트 16.5원 / 캐러셀 48.0원
+                    </td>
+                    <td className="py-3 px-4 text-slate-600">이동통신 3사 RCS 규격 (스마트폰 기본 문자함에 브랜드 프로필 탑재)</td>
+                    <td className="py-3 px-4 text-emerald-600 font-bold">브랜드 프로필 및 액션 버튼 린팅</td>
+                    <td className="py-3 px-4 text-slate-600">앱 설치 없는 리치 UI</td>
+                  </tr>
+
+                  <tr className="hover:bg-pastel-blue-50/40 transition-colors">
+                    <td className="py-3 px-4 font-bold text-slate-900 flex items-center gap-2">
+                      <Cpu className="w-4 h-4 text-purple-600" />
+                      DevOps 메신저 & Webhook
+                    </td>
+                    <td className="py-3 px-4 text-emerald-600 font-black">
+                      100% 무료 (0원)
+                    </td>
+                    <td className="py-3 px-4 text-slate-600">Slack, MS Teams, Discord, Custom Webhook 실시간 푸시</td>
+                    <td className="py-3 px-4 text-emerald-600 font-bold">JSON Payload 스키마 유효성 검사</td>
+                    <td className="py-3 px-4 text-slate-600">내부 운영/결제 알림</td>
+                  </tr>
+
+                  <tr className="hover:bg-pastel-blue-50/40 transition-colors">
+                    <td className="py-3 px-4 font-bold text-slate-900 flex items-center gap-2">
+                      <Globe className="w-4 h-4 text-indigo-600" />
+                      글로벌 해외 SMS
+                    </td>
+                    <td className="py-3 px-4 text-slate-900 font-bold">
+                      북미 14원 / 일본 32원 / 유럽 45원
+                    </td>
+                    <td className="py-3 px-4 text-slate-600">Twilio / Infobip 모듈식 하네스 어댑터 경유</td>
+                    <td className="py-3 px-4 text-emerald-600 font-bold">국가별 발신번호(SenderID) 룰셋</td>
+                    <td className="py-3 px-4 text-slate-600">글로벌 OTP 본인인증</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
 
       </div>
