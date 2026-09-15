@@ -27,9 +27,9 @@ export const PricingSection: React.FC = () => {
 
   // Plan recommendation logic
   const getRecommendedPlan = () => {
-    if (teamSeats >= 25 || alimtalkCount > 30000 || emailCount > 200000) {
+    if (teamSeats >= 15 || alimtalkCount > 30000 || emailCount > 150000) {
       return {
-        name: 'Enterprise Isolated',
+        name: '엔터프라이즈 (Enterprise)',
         basePrice: 990000,
         freeEmails: 300000,
         freePush: 1000000,
@@ -38,38 +38,38 @@ export const PricingSection: React.FC = () => {
         trafficText: '전용망 무제한 대역폭',
         seatsIncluded: '전사 무제한',
       };
-    } else if (teamSeats > 5 || alimtalkCount > 10000 || emailCount > 50000) {
+    } else if (teamSeats > 3 || alimtalkCount > 2000 || emailCount > 20000) {
       return {
-        name: 'Business Scale',
-        basePrice: isYearly ? 159000 : 199000,
-        freeEmails: 100000,
-        freePush: 200000,
-        freeAlimtalk: 10000,
-        trafficIncludedGB: 300,
-        trafficText: 'AWS 트래픽 300GB 번들',
-        seatsIncluded: '20인 기본 포함',
+        name: '프로 (Pro)',
+        basePrice: isYearly ? 55000 : 69000,
+        freeEmails: 60000,
+        freePush: 120000,
+        freeAlimtalk: 5000,
+        trafficIncludedGB: 100,
+        trafficText: 'AWS 트래픽 100GB 번들',
+        seatsIncluded: '10인 기본 포함',
       };
-    } else if (teamSeats > 1 || alimtalkCount > 0 || emailCount > 0) {
+    } else if (teamSeats > 1 || alimtalkCount > 0 || emailCount > 1000) {
       return {
-        name: 'Team Growth',
-        basePrice: isYearly ? 39000 : 49000,
-        freeEmails: 20000,
-        freePush: 50000,
-        freeAlimtalk: 0,
-        trafficIncludedGB: 50,
-        trafficText: 'AWS 트래픽 50GB 번들',
-        seatsIncluded: '5인 기본 포함',
+        name: '비기너 (Beginner)',
+        basePrice: isYearly ? 15000 : 19000,
+        freeEmails: 15000,
+        freePush: 30000,
+        freeAlimtalk: 1000,
+        trafficIncludedGB: 20,
+        trafficText: 'AWS 트래픽 20GB 번들',
+        seatsIncluded: '3인 기본 포함',
       };
     } else {
       return {
-        name: 'Lite 마이크로 종량제',
+        name: '무료 (Free)',
         basePrice: 0,
-        freeEmails: 0,
-        freePush: 0,
+        freeEmails: 1000,
+        freePush: 3000,
         freeAlimtalk: 0,
-        trafficIncludedGB: 5,
-        trafficText: 'AWS 트래픽 5GB 번들',
-        seatsIncluded: '1인 단독',
+        trafficIncludedGB: 2,
+        trafficText: 'AWS 트래픽 2GB 번들',
+        seatsIncluded: '1인 전용 (일일 300건 캡)',
       };
     }
   };
@@ -139,7 +139,7 @@ export const PricingSection: React.FC = () => {
         {/* 4 Pricing Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch max-w-7xl mx-auto mb-20">
           
-          {/* Plan 1: Solo Lite (1인 셀러) */}
+          {/* Plan 1: 무료 (Free) */}
           <div className="glass-card rounded-3xl p-6 border border-slate-200 flex flex-col justify-between space-y-6 hover:border-pastel-blue-300 transition-all">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
@@ -152,43 +152,44 @@ export const PricingSection: React.FC = () => {
               </div>
 
               <div>
-                <h3 className="text-xl font-bold text-slate-900">Lite 마이크로 종량제</h3>
-                <p className="text-xs text-slate-500 mt-1">월 기본료 0원, 1만 원 단위 충전으로 즉시 발송</p>
+                <h3 className="text-xl font-bold text-slate-900">무료 (Free)</h3>
+                <p className="text-xs text-slate-500 mt-1">월 기본료 0원, 1인 셀러 체험 & 린터 영구 무료</p>
               </div>
 
               <div className="flex items-baseline gap-1 text-slate-900">
                 <span className="text-4xl font-black">0</span>
-                <span className="text-xs font-semibold text-slate-500">원 / 월 기본료</span>
+                <span className="text-xs font-semibold text-slate-500">원 / 영구 무료</span>
               </div>
 
-              {/* Channel Rates */}
+              {/* Channel Rates & Free Allowances */}
               <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2 text-xs">
                 <div className="font-bold text-slate-700 border-b border-slate-200 pb-1 flex justify-between">
-                  <span>지원 채널 단가</span>
-                  <span className="text-[10px] text-pastel-blue-600 font-bold">건당 종량제</span>
+                  <span>매월 무료 발송 쿼터</span>
+                  <span className="text-[10px] text-pastel-blue-600 font-bold">1일 자동 충전</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-600">자체 이메일</span>
-                  <span className="text-slate-900 font-bold">1.5원</span>
+                  <span className="text-slate-900 font-bold">1,000건 무료</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-600">앱 푸시 (Object)</span>
-                  <span className="text-slate-900 font-bold">0.2원</span>
+                  <span className="text-slate-900 font-bold">3,000건 무료</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-600">LINE (BYO 키 연동)</span>
-                  <span className="text-emerald-600 font-bold">0원 (무료)</span>
+                  <span className="text-slate-600">AWS 트래픽 번들</span>
+                  <span className="text-emerald-600 font-bold">2GB 무료</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-600">카카오 알림톡</span>
-                  <span className="text-slate-900 font-bold">8.5원</span>
+                  <span className="text-slate-600">웰컴 크레딧</span>
+                  <span className="text-pastel-orange-600 font-bold">1,000원 지급</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-600">SMS 단문</span>
-                  <span className="text-slate-900 font-bold">9.8원</span>
+                  <span className="text-slate-600">LINE (BYO 키)</span>
+                  <span className="text-emerald-600 font-bold">0원 무료</span>
                 </div>
               </div>
 
+              {/* Limits and features */}
               <div className="space-y-2 text-xs text-slate-600 pt-1">
                 <div className="flex items-center gap-2">
                   <Check className="w-4 h-4 text-pastel-blue-600 shrink-0" />
@@ -196,15 +197,15 @@ export const PricingSection: React.FC = () => {
                 </div>
                 <div className="flex items-center gap-2">
                   <Check className="w-4 h-4 text-pastel-blue-600 shrink-0" />
-                  <span>AWS 아웃바운드 트래픽 5GB 번들 제공</span>
+                  <span>일일 300건 캡 & 1회 500명 (스팸 방어)</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Check className="w-4 h-4 text-pastel-blue-600 shrink-0" />
-                  <span>1만 원 단위 충전 (유효기간 무제한)</span>
+                  <span>발송 로그 14일 & 템플릿 5개 보관</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Check className="w-4 h-4 text-pastel-blue-600 shrink-0" />
-                  <span>3-Click 엑셀 업로드 웹 포털</span>
+                  <span>알림톡(8.5원)/문자(9.8원) 종량 충전</span>
                 </div>
               </div>
             </div>
@@ -213,30 +214,30 @@ export const PricingSection: React.FC = () => {
               href="#ai-demo"
               className="w-full py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-sm text-center transition-all border border-slate-300"
             >
-              1만 원 충전으로 시작
+              0원으로 즉시 시작
             </a>
           </div>
 
-          {/* Plan 2: Team Growth (3~5인 팀) */}
+          {/* Plan 2: 비기너 (Beginner) */}
           <div className="glass-card rounded-3xl p-6 border border-pastel-blue-300 flex flex-col justify-between space-y-6 hover:border-pastel-blue-500 transition-all shadow-sm hover:shadow-md">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold px-2.5 py-1 rounded-md bg-pastel-blue-50 text-pastel-blue-700 border border-pastel-blue-200">
-                  스타트업 / 마케팅팀
+                  초기 스타트업 / 셀러
                 </span>
                 <span className="text-xs text-pastel-blue-700 font-bold flex items-center gap-1">
-                  <Users className="w-3.5 h-3.5" /> 5인 포함
+                  <Users className="w-3.5 h-3.5" /> 3인 포함
                 </span>
               </div>
 
               <div>
-                <h3 className="text-xl font-bold text-slate-900">Team Growth</h3>
-                <p className="text-xs text-slate-500 mt-1">팀 협업 워크스페이스 & 발송 승인 결재</p>
+                <h3 className="text-xl font-bold text-slate-900">비기너 (Beginner)</h3>
+                <p className="text-xs text-slate-500 mt-1">초기 스타트업 & 3인 협업의 시작</p>
               </div>
 
               <div className="flex items-baseline gap-1 text-slate-900">
                 <span className="text-4xl font-black">
-                  {isYearly ? '39,000' : '49,000'}
+                  {isYearly ? '15,000' : '19,000'}
                 </span>
                 <span className="text-xs font-semibold text-slate-500">원 / 월</span>
               </div>
@@ -245,42 +246,46 @@ export const PricingSection: React.FC = () => {
               <div className="p-3.5 rounded-2xl bg-pastel-blue-50/70 border border-pastel-blue-200/80 space-y-2 text-xs">
                 <div className="font-bold text-pastel-blue-900 border-b border-pastel-blue-200 pb-1 flex justify-between">
                   <span>월 기본 포함량 (무료)</span>
-                  <span className="text-[10px] text-pastel-orange-600 font-bold">월 4.5만원 상당</span>
+                  <span className="text-[10px] text-pastel-orange-600 font-bold">월 3.7만원 상당</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-600">자체 이메일</span>
-                  <span className="text-pastel-blue-700 font-bold">20,000건 무료</span>
+                  <span className="text-pastel-blue-700 font-bold">15,000건 무료</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-600">앱 푸시 Object</span>
-                  <span className="text-pastel-blue-700 font-bold">50,000건 무료</span>
+                  <span className="text-pastel-blue-700 font-bold">30,000건 무료</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-600">카카오 알림톡</span>
+                  <span className="text-pastel-orange-600 font-bold">1,000건 무료</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-600">AWS 트래픽 번들</span>
-                  <span className="text-emerald-700 font-bold">50GB 무료</span>
+                  <span className="text-emerald-700 font-bold">20GB 무료</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-600">알림톡 ➔ 문자</span>
                   <span className="text-pastel-orange-600 font-bold">Failover 무료</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-600">LINE / Slack / Teams</span>
-                  <span className="text-pastel-blue-700 font-bold">무료 연동</span>
                 </div>
               </div>
 
               <div className="space-y-2 text-xs text-slate-600 pt-1">
                 <div className="flex items-center gap-2">
                   <Check className="w-4 h-4 text-pastel-blue-600 shrink-0" />
-                  <span>5인 협업 권한 (작성자 / 발송승인자)</span>
+                  <span>3인 협업 워크스페이스 & 공유 템플릿</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Check className="w-4 h-4 text-pastel-blue-600 shrink-0" />
-                  <span>오발송 방지 템플릿 결재 워크플로우</span>
+                  <span>일일 발송 캡 무제한 (월 쿼터 내 자유)</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Check className="w-4 h-4 text-pastel-blue-600 shrink-0" />
-                  <span>캠페인 예약 & 크로스채널 성과 분석</span>
+                  <span>속도 50 TPS & 로그 90일 보관 (템플릿 30개)</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Check className="w-4 h-4 text-pastel-blue-600 shrink-0" />
+                  <span>친구톡(14.5원) / LMS(29원) 풀지원</span>
                 </div>
               </div>
             </div>
@@ -293,7 +298,7 @@ export const PricingSection: React.FC = () => {
             </a>
           </div>
 
-          {/* Plan 3: Business Scale (10~30인 기업) - POPULAR */}
+          {/* Plan 3: 프로 (Pro) - POPULAR */}
           <div className="glass-card rounded-3xl p-6 border-2 border-pastel-orange-400 flex flex-col justify-between space-y-6 relative shadow-xl shadow-pastel-orange-500/10">
             <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-3.5 py-1 rounded-full bg-gradient-to-r from-pastel-orange-500 to-pastel-orange-600 text-white text-[11px] font-black uppercase tracking-wider shadow-md">
               Most Popular
@@ -302,21 +307,21 @@ export const PricingSection: React.FC = () => {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold px-2.5 py-1 rounded-md bg-pastel-orange-50 text-pastel-orange-700 border border-pastel-orange-200">
-                  중견 / 성장 이커머스
+                  성장 기업 / 전문 마케팅팀
                 </span>
                 <span className="text-xs text-pastel-orange-700 font-bold flex items-center gap-1">
-                  <Users className="w-3.5 h-3.5" /> 20인 포함
+                  <Users className="w-3.5 h-3.5" /> 10인 포함
                 </span>
               </div>
 
               <div>
-                <h3 className="text-xl font-bold text-slate-900">Business Scale</h3>
-                <p className="text-xs text-slate-500 mt-1">부서별 서브 테넌트 & LMS/친구톡/확장 채널 풀지원</p>
+                <h3 className="text-xl font-bold text-slate-900">프로 (Pro)</h3>
+                <p className="text-xs text-slate-500 mt-1">성장 이커머스 & 3단계 발송 승인 결재</p>
               </div>
 
               <div className="flex items-baseline gap-1 text-slate-900">
                 <span className="text-4xl font-black">
-                  {isYearly ? '159,000' : '199,000'}
+                  {isYearly ? '55,000' : '69,000'}
                 </span>
                 <span className="text-xs font-semibold text-slate-500">원 / 월</span>
               </div>
@@ -325,42 +330,46 @@ export const PricingSection: React.FC = () => {
               <div className="p-3.5 rounded-2xl bg-pastel-orange-50/70 border border-pastel-orange-200/80 space-y-2 text-xs">
                 <div className="font-bold text-pastel-orange-900 border-b border-pastel-orange-200 pb-1 flex justify-between">
                   <span>월 기본 포함량 (무료)</span>
-                  <span className="text-[10px] text-pastel-blue-700 font-bold">월 27만원 상당</span>
+                  <span className="text-[10px] text-pastel-blue-700 font-bold">월 15.6만원 상당</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-600">자체 이메일</span>
-                  <span className="text-slate-900 font-bold">100,000건 무료</span>
+                  <span className="text-slate-900 font-bold">60,000건 무료</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-600">앱 푸시 Object</span>
-                  <span className="text-slate-900 font-bold">200,000건 무료</span>
+                  <span className="text-slate-900 font-bold">120,000건 무료</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-600">카카오 알림톡</span>
-                  <span className="text-pastel-orange-600 font-bold">10,000건 무료</span>
+                  <span className="text-pastel-orange-600 font-bold">5,000건 무료</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-600">AWS 트래픽 번들</span>
-                  <span className="text-emerald-700 font-bold">300GB 무료</span>
+                  <span className="text-emerald-700 font-bold">100GB 무료</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-600">친구톡 / LMS / RCS</span>
-                  <span className="text-slate-900 font-bold">전 채널 연동</span>
+                  <span className="text-slate-600">확장 채널</span>
+                  <span className="text-slate-900 font-bold">RCS / WhatsApp 연동</span>
                 </div>
               </div>
 
               <div className="space-y-2 text-xs text-slate-600 pt-1">
                 <div className="flex items-center gap-2">
                   <Check className="w-4 h-4 text-pastel-orange-600 shrink-0" />
-                  <span>20인 워크스페이스 & 부서별 3개 서브 테넌트</span>
+                  <span>10인 워크스페이스 & 부서별 3개 서브 테넌트</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Check className="w-4 h-4 text-pastel-orange-600 shrink-0" />
-                  <span>부서별 발송 예산 한도 할당 및 잠금</span>
+                  <span>3단계 사전 승인 결재선 (오발송 100% 차단)</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Check className="w-4 h-4 text-pastel-orange-600 shrink-0" />
-                  <span>초당 1만 건 발송 큐 우선권 & REST API</span>
+                  <span>부서별 발송 예산 잠금 & 1,000 TPS 우선 큐</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Check className="w-4 h-4 text-pastel-orange-600 shrink-0" />
+                  <span>발송 로그 1년 보관 & 템플릿 무제한</span>
                 </div>
               </div>
             </div>
@@ -369,11 +378,11 @@ export const PricingSection: React.FC = () => {
               href="#ai-demo"
               className="w-full py-3 rounded-xl bg-gradient-to-r from-pastel-orange-500 to-pastel-orange-600 hover:from-pastel-orange-600 hover:to-pastel-orange-700 text-white font-bold text-sm text-center transition-all shadow-md shadow-pastel-orange-500/25 hover:scale-[1.02]"
             >
-              비즈니스 시작하기
+              프로 플랜 시작하기
             </a>
           </div>
 
-          {/* Plan 4: Enterprise Isolated (무제한 인원 / 대기업) */}
+          {/* Plan 4: 엔터프라이즈 (Enterprise) */}
           <div className="glass-card rounded-3xl p-6 border border-slate-200 flex flex-col justify-between space-y-6 hover:border-emerald-400 transition-all">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
@@ -386,7 +395,7 @@ export const PricingSection: React.FC = () => {
               </div>
 
               <div>
-                <h3 className="text-xl font-bold text-slate-900">Enterprise Isolated</h3>
+                <h3 className="text-xl font-bold text-slate-900">엔터프라이즈 (Enterprise)</h3>
                 <p className="text-xs text-slate-500 mt-1">온프레미스급 가상 격리 & 전용선 연동</p>
               </div>
 
@@ -426,11 +435,15 @@ export const PricingSection: React.FC = () => {
                 </div>
                 <div className="flex items-center gap-2">
                   <Check className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <span>초당 5.4만 건 전용 큐 할당 & SLA 99.9%</span>
+                  <span>초당 5.4만 건 독점 엔진 & SLA 99.9%</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Check className="w-4 h-4 text-emerald-600 shrink-0" />
                   <span>사내 Oracle/MySQL 직접 연동 지원</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Check className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span>ISMS-P 전담 기술 지원 & 24/7 핫라인</span>
                 </div>
               </div>
             </div>
@@ -586,10 +599,10 @@ export const PricingSection: React.FC = () => {
                   className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-pastel-blue-600"
                 />
                 <div className="flex justify-between text-[10px] text-slate-400">
-                  <span>1인 (단독)</span>
-                  <span>5인 (팀)</span>
-                  <span>20인 (성장기업)</span>
-                  <span>40인+</span>
+                  <span>1인 (무료)</span>
+                  <span>3인 (비기너)</span>
+                  <span>10인 (프로)</span>
+                  <span>20인+ (엔터프라이즈)</span>
                 </div>
               </div>
 
