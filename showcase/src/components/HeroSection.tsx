@@ -38,7 +38,7 @@ export const HeroSection: React.FC = () => {
           {/* Action CTAs */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
             <a
-              href="#ai-demo"
+              href="#templates"
               className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-8 py-4 rounded-xl text-base font-bold text-white bg-gradient-to-r from-pastel-blue-600 via-sky-600 to-pastel-orange-500 hover:from-pastel-blue-700 hover:to-pastel-orange-600 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 shadow-xl shadow-pastel-blue-500/20 group"
             >
               <Sparkles className="w-5 h-5 text-pastel-orange-200 group-hover:rotate-12 transition-transform" />

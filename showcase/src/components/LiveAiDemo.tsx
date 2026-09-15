@@ -32,22 +32,21 @@ export const LiveAiDemo: React.FC = () => {
   const channelData = currentPreset.channels[channelTab];
 
   return (
-    <section id="ai-demo" className="py-20 md:py-28 relative">
+    <section id="templates" className="py-20 md:py-28 relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto space-y-4 mb-16">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-pastel-blue-50 border border-pastel-blue-200 text-pastel-blue-700 text-xs font-bold shadow-sm">
             <Sparkles className="w-3.5 h-3.5 text-pastel-orange-500" />
-            <span>실시간 인터랙티브 킬러 기능 체험</span>
+            <span>3) 템플릿 생성 : AI 기반 채널별 배너 & 정보통신망법 준수</span>
           </div>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 tracking-tight">
-            이미지 1장 + 키워드로 <span className="gradient-text font-black">3초 만에 완성</span>되는<br />
-            규정 준수 완제 템플릿 빌더
+            AI 기반 채널별 샘플 배너 자동 생성<br />
+            <span className="gradient-text font-black">2nd Brain Context 정제</span> & 광고/정보성 법령 구분
           </h2>
           <p className="text-slate-600 text-base sm:text-lg">
-            직접 아래 샘플 배너를 클릭해보세요. 2nd Brain AI가 법령 위반(과태료 3천만 원) 위험을 사전에 100% 차단하고,
-            건당 1원 미만의 극가성비로 템플릿을 자동 조립합니다.
+            이미지 1장과 키워드로 채널별 최적 규격 배너를 3초 만에 생성합니다. 국내 정보통신망법 제50조(광고/정보성 구분, 080 수신거부)를 완전 자동 검증하며, 자체 2nd Brain 지식 베이스의 Context 슬라이싱으로 AI 토큰 비용을 82% 이상 절감합니다.
           </p>
         </div>
 

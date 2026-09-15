@@ -5,21 +5,21 @@ export const DualUxSection: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'lite' | 'pro'>('lite');
 
   return (
-    <section id="dual-ux" className="py-20 md:py-28 bg-white border-y border-slate-200 relative">
+    <section id="accessibility" className="py-20 md:py-28 bg-white border-y border-slate-200 relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto space-y-4 mb-14">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-pastel-blue-50 border border-pastel-blue-200 text-pastel-blue-700 text-xs font-bold shadow-sm">
             <Layers className="w-3.5 h-3.5" />
-            <span>하이브리드 접근성 혁신</span>
+            <span>4) 고객 접근성 : 1인 셀러 노코드 ➔ 기업/개발자 Pro Mode</span>
           </div>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 tracking-tight">
-            어려운 기술은 뒤로 숨겼습니다.<br />
-            <span className="text-pastel-blue-600">3번의 클릭</span>이거나, <span className="text-pastel-orange-500">무한한 확장성</span>이거나.
+            누구나 쉬운 노코드 워크플로우부터<br />
+            <span className="text-pastel-blue-600">사내 DB 직접 쿼리</span>와 <span className="text-pastel-orange-500">테넌트 암호화 Pro Mode</span>까지
           </h2>
           <p className="text-slate-600 text-base sm:text-lg">
-            1인 창업가는 복잡한 개발 지식 없이 1분 만에 발송하고, 대기업 엔지니어는 사내망 DB 쿼리와 복합 스케줄러로 초당 수만 건을 제어합니다.
+            1인 셀러·소상공인은 복잡한 개발 없이 노코드 3-Click으로 1분 만에 대량 발송하고, 기업 및 전문 엔지니어는 사내망 DB 직접 쿼리와 PBKDF2/AES-256 테넌트 전용 암호화 체계로 초당 수만 건을 안전하게 제어합니다.
           </p>
 
           {/* Toggle Switch */}

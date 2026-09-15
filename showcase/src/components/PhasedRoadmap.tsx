@@ -3,22 +3,21 @@ import { Route, Mail, Bell, MessageSquare, ShieldCheck, Zap, ArrowRight, Layers,
 
 export const PhasedRoadmap: React.FC = () => {
   return (
-    <section id="roadmap" className="py-20 md:py-28 bg-white border-t border-slate-200 relative">
+    <section id="channels" className="py-20 md:py-28 bg-white border-t border-slate-200 relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto space-y-4 mb-16">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-pastel-blue-50 border border-pastel-blue-200 text-pastel-blue-700 text-xs font-bold shadow-sm">
             <Route className="w-3.5 h-3.5 text-pastel-orange-500" />
-            <span>순차적 채널 온보딩 & 하네스(Harness) 전략</span>
+            <span>2) 다양한 채널 : 이메일 / 푸시 / LINE + 문자·메시지 확장 관리</span>
           </div>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 tracking-tight">
-            진입장벽을 단계적으로 허무는<br />
-            <span className="gradient-text font-black">3단계 성장 공식</span>과 모듈식 하네스
+            사업 확장에 따른 유연한 채널 도입<br />
+            <span className="gradient-text font-black">딜러사 API ➔ 중계 Agent ➔ 자체 Netty Agent</span>
           </h2>
           <p className="text-slate-600 text-base sm:text-lg">
-            채널톡·아임웹이 검증한 유니콘의 전략 그대로, 무리한 초기 투자 없이
-            오픈형 채널에서 출발하여 공식 통신사 딜러사로 도약하는 현실적인 고수익 로드맵입니다.
+            이메일, 푸시, LINE 등 진입장벽 Zero 오픈 채널로 Day 1 즉시 가동하고, 사업 성장에 따라 딜러사 API 연동 ➔ 딜러사 중계 Agent 활용 ➔ 자체 Netty 소켓 Agent 개발로 전환하는 모듈식 하네스 로드맵을 제공합니다.
           </p>
         </div>
 

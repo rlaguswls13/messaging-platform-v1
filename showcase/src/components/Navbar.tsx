@@ -41,44 +41,42 @@ export const Navbar: React.FC = () => {
             </div>
           </a>
 
-          {/* Desktop Nav Links */}
-          <div className="hidden md:flex items-center gap-7 text-sm font-semibold text-slate-600">
-            <a href="#ai-demo" className="hover:text-pastel-blue-600 transition-colors flex items-center gap-1.5">
-              <Sparkles className="w-4 h-4 text-pastel-orange-500" />
-              AI 템플릿 체험
+          {/* Desktop Nav Links (What to do 4대 축) */}
+          <div className="hidden lg:flex items-center gap-6 text-sm font-semibold text-slate-600">
+            <a href="#dashboard" className="hover:text-pastel-blue-600 transition-colors flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-pastel-blue-500"></span>
+              대시보드
             </a>
-            <a href="#dual-ux" className="hover:text-pastel-blue-600 transition-colors">
-              Dual-UX
+            <a href="#channels" className="hover:text-pastel-blue-600 transition-colors flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-sky-500"></span>
+              다양한 채널
             </a>
-            <a href="#security" className="hover:text-pastel-blue-600 transition-colors flex items-center gap-1.5">
-              <Shield className="w-4 h-4 text-emerald-600" />
-              엔터프라이즈 보안
+            <a href="#templates" className="hover:text-pastel-blue-600 transition-colors flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5 text-pastel-orange-500" />
+              템플릿 생성
             </a>
-            <a href="#performance" className="hover:text-pastel-blue-600 transition-colors flex items-center gap-1.5">
-              <Server className="w-4 h-4 text-pastel-blue-600" />
-              5.4만 TPS 성능
-            </a>
-            <a href="#roadmap" className="hover:text-pastel-blue-600 transition-colors">
-              채널 로드맵
+            <a href="#accessibility" className="hover:text-pastel-blue-600 transition-colors flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+              고객 접근성
             </a>
             <a href="#pricing" className="hover:text-pastel-orange-600 transition-colors font-bold text-pastel-orange-600">
-              요금제 & 인원수
+              요금제
             </a>
           </div>
 
           {/* Desktop CTA */}
-          <div className="hidden md:flex items-center gap-3">
+          <div className="hidden lg:flex items-center gap-3">
             <a
-              href="#ai-demo"
+              href="#dashboard"
               className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-pastel-blue-600 via-sky-600 to-pastel-orange-500 hover:from-pastel-blue-700 hover:to-pastel-orange-600 transition-all duration-300 shadow-md shadow-pastel-blue-500/20 hover:shadow-lg hover:shadow-pastel-orange-500/25 hover:-translate-y-0.5"
             >
-              <span>3초 무료 체험</span>
+              <span>실시간 분석 보기</span>
               <ArrowRight className="w-4 h-4" />
             </a>
           </div>
 
           {/* Mobile Menu Button */}
-          <div className="md:hidden flex items-center">
+          <div className="lg:hidden flex items-center">
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="p-2 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100"
@@ -92,56 +90,49 @@ export const Navbar: React.FC = () => {
 
       {/* Mobile Menu Dropdown */}
       {mobileMenuOpen && (
-        <div className="md:hidden bg-white/95 backdrop-blur-xl border-b border-slate-200 px-5 pt-3 pb-6 space-y-3 mt-2 shadow-xl">
+        <div className="lg:hidden bg-white/95 backdrop-blur-xl border-b border-slate-200 px-5 pt-3 pb-6 space-y-3 mt-2 shadow-xl">
           <a
-            href="#ai-demo"
+            href="#dashboard"
             onClick={() => setMobileMenuOpen(false)}
-            className="block py-2 text-slate-700 font-semibold hover:text-pastel-blue-600"
+            className="block py-2 text-slate-800 font-bold hover:text-pastel-blue-600"
           >
-            ⚡ AI 템플릿 실시간 체험
+            📊 1) 대시보드 : 발송·클릭·오픈·고객수
           </a>
           <a
-            href="#dual-ux"
+            href="#channels"
             onClick={() => setMobileMenuOpen(false)}
-            className="block py-2 text-slate-700 font-semibold hover:text-pastel-blue-600"
+            className="block py-2 text-slate-800 font-bold hover:text-pastel-blue-600"
           >
-            👥 Dual-UX (소상공인 vs 엔터프라이즈)
+            🔌 2) 다양한 채널 : 이메일/푸시/LINE + 문자
           </a>
           <a
-            href="#security"
+            href="#templates"
             onClick={() => setMobileMenuOpen(false)}
-            className="block py-2 text-slate-700 font-semibold hover:text-pastel-blue-600"
+            className="block py-2 text-slate-800 font-bold hover:text-pastel-blue-600"
           >
-            🛡️ 가상 인프라 격리 보안
+            ✨ 3) 템플릿 생성 : AI 멀티채널 배너 & 법령준수
           </a>
           <a
-            href="#performance"
+            href="#accessibility"
             onClick={() => setMobileMenuOpen(false)}
-            className="block py-2 text-slate-700 font-semibold hover:text-pastel-blue-600"
+            className="block py-2 text-slate-800 font-bold hover:text-pastel-blue-600"
           >
-            🚀 초당 5.4만 건 실측 성능
-          </a>
-          <a
-            href="#roadmap"
-            onClick={() => setMobileMenuOpen(false)}
-            className="block py-2 text-slate-700 font-semibold hover:text-pastel-blue-600"
-          >
-            🔌 3단계 순차 채널 로드맵
+            👥 4) 고객 접근성 : 노코드 ➔ Pro Mode (DB쿼리/암호화)
           </a>
           <a
             href="#pricing"
             onClick={() => setMobileMenuOpen(false)}
-            className="block py-2 text-pastel-orange-600 font-bold hover:text-pastel-orange-700"
+            className="block py-2 text-pastel-orange-600 font-extrabold hover:text-pastel-orange-700"
           >
-            💳 요금제 및 인원수 견적
+            💳 요금제 및 인원수 정책
           </a>
           <div className="pt-2">
             <a
-              href="#ai-demo"
+              href="#templates"
               onClick={() => setMobileMenuOpen(false)}
               className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-white bg-gradient-to-r from-pastel-blue-600 to-pastel-orange-500 shadow-md"
             >
-              지금 템플릿 무료 생성
+              AI 템플릿 즉시 체험
             </a>
           </div>
         </div>
