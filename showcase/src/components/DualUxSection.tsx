@@ -11,12 +11,12 @@ export const DualUxSection: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto space-y-4 mb-14">
+        <div className="text-center max-w-3xl lg:max-w-4xl mx-auto space-y-4 mb-14">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-pastel-blue-50 border border-pastel-blue-200 text-pastel-blue-700 text-xs font-bold shadow-sm">
             <Layers className="w-3.5 h-3.5" />
             <span>4) 고객 접근성 : 1인 셀러 노코드 ➔ 기업/개발자 Pro Mode</span>
           </div>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 tracking-tight">
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
             누구나 쉬운 노코드 워크플로우부터<br />
             <span className="text-pastel-blue-600">사내 DB 직접 쿼리</span>와 <span className="text-pastel-orange-500">테넌트 암호화 Pro Mode</span>까지
           </h2>

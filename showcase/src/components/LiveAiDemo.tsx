@@ -36,12 +36,12 @@ export const LiveAiDemo: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto space-y-4 mb-16">
+        <div className="text-center max-w-3xl lg:max-w-4xl mx-auto space-y-4 mb-16">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-pastel-blue-50 border border-pastel-blue-200 text-pastel-blue-700 text-xs font-bold shadow-sm">
             <Sparkles className="w-3.5 h-3.5 text-pastel-orange-500" />
             <span>3) 템플릿 생성 : AI 기반 채널별 배너 & 정보통신망법 준수</span>
           </div>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 tracking-tight">
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
             AI 기반 채널별 샘플 배너 자동 생성<br />
             <span className="gradient-text font-black">2nd Brain Context 정제</span> & 광고/정보성 법령 구분
           </h2>
@@ -180,7 +180,7 @@ export const LiveAiDemo: React.FC = () => {
                   2nd Brain Context Slicing 리포트
                 </span>
                 <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
-                  비용 92% 절감
+                  비용 90%+ 절감
                 </span>
               </div>
 

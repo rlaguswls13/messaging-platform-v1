@@ -10,6 +10,12 @@ export interface WhitelabelConfig {
   sendModeDescription: string;
   heroCtaPrimary: string;
   heroCtaSecondary: string;
+  /** 비교표 하단 "가치 요약" 카드 4번째 항목. 빈 문자열이면 표시하지 않음(3칸 유지). */
+  integrationHighlightTitle: string;
+  integrationHighlightDesc: string;
+  /** 무료 플랜 카드 배지/설명 문구 */
+  freeTierBadge: string;
+  freeTierDescription: string;
 }
 
 export const WHITELABEL_CONFIGS: Record<BankId, WhitelabelConfig> = {
@@ -23,17 +29,25 @@ export const WHITELABEL_CONFIGS: Record<BankId, WhitelabelConfig> = {
     sendModeDescription: '1인 셀러부터 기업까지, 노코드 3-Click으로 즉시 대량 발송합니다.',
     heroCtaPrimary: '이미지 1장으로 AI 템플릿 즉시 체험',
     heroCtaSecondary: '채널·인원별 요금표 확인하기',
+    integrationHighlightTitle: '',
+    integrationHighlightDesc: '',
+    freeTierBadge: '1인 셀러 / 소상공인',
+    freeTierDescription: '월 기본료 0원, 1인 셀러 체험 & 린터 영구 무료',
   },
   hana: {
     id: 'hana',
-    brandName: 'OmniFlow for 제휴기관',
-    brandTagline: '제휴기관 전용 화이트라벨 메시징 솔루션',
+    brandName: 'OmniFlow for 연계기관',
+    brandTagline: '연계기관 앱과 연동되는 상생형 소상공인 안심 마케팅 포털',
     logoGradientClass: 'from-emerald-600 via-teal-500 to-emerald-400',
-    applicationBadge: '모두의 창업 2기 도전신청서(제휴기관)',
+    applicationBadge: '모두의 창업 2기 도전신청서(연계기관)',
     sendModeLabel: '기관 연계형 발송',
-    sendModeDescription: '제휴기관의 자체 앱 알림 체계와 연계하여 고객 접점에 맞춰 발송합니다.',
-    heroCtaPrimary: '제휴기관 연계 템플릿 즉시 체험',
-    heroCtaSecondary: '제휴기관 전용 요금 안내 확인하기',
+    sendModeDescription: '연계기관 앱의 알림 체계와 연동하여 고객 접점에 맞춰 발송합니다.',
+    heroCtaPrimary: '연계기관 연동 템플릿 즉시 체험',
+    heroCtaSecondary: '연계기관 전용 요금 안내 확인하기',
+    integrationHighlightTitle: '연계기관 앱 연동성',
+    integrationHighlightDesc: '인앱(In-App) 위젯 연동 최적화로 기관 앱 안에서 바로 접근·발송 가능. 기존 도구는 외부 개별 사이트이거나 복잡한 별도 연동이 필요합니다.',
+    freeTierBadge: '연계기관 앱 연동 고객',
+    freeTierDescription: '월 기본료 0원, 연계기관 사업자 계좌 보유 고객 대상 상생 플랜',
   },
 };
 

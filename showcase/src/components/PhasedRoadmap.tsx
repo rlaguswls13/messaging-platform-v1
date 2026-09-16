@@ -7,12 +7,12 @@ export const PhasedRoadmap: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto space-y-4 mb-16">
+        <div className="text-center max-w-3xl lg:max-w-4xl mx-auto space-y-4 mb-16">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-pastel-blue-50 border border-pastel-blue-200 text-pastel-blue-700 text-xs font-bold shadow-sm">
             <Route className="w-3.5 h-3.5 text-pastel-orange-500" />
             <span>2) 다양한 채널 : 이메일 / 푸시 / LINE + 문자·메시지 확장 관리</span>
           </div>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 tracking-tight">
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
             사업 확장에 따른 유연한 채널 도입<br />
             <span className="gradient-text font-black">딜러사 API ➔ 중계 Agent ➔ 자체 Netty Agent</span>
           </h2>

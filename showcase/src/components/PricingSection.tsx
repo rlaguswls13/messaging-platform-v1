@@ -4,8 +4,10 @@ import {
   MessageSquare, Mail, Bell, Smartphone, HelpCircle, Layers,
   Globe, Server, Radio, HardDrive, Info, ExternalLink, RefreshCw, Cpu
 } from 'lucide-react';
+import { useWhitelabel } from '../context/WhitelabelContext';
 
 export const PricingSection: React.FC = () => {
+  const whitelabel = useWhitelabel();
   const [isYearly, setIsYearly] = useState<boolean>(false);
   const [channelTab, setChannelTab] = useState<'domestic' | 'global_future'>('domestic');
 
@@ -144,7 +146,7 @@ export const PricingSection: React.FC = () => {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold px-2.5 py-1 rounded-md bg-slate-100 text-slate-700 border border-slate-200">
-                  1인 셀러 / 소상공인
+                  {whitelabel.freeTierBadge}
                 </span>
                 <span className="text-xs text-slate-500 font-medium flex items-center gap-1">
                   <Users className="w-3.5 h-3.5" /> 1인 전용
@@ -153,7 +155,7 @@ export const PricingSection: React.FC = () => {
 
               <div>
                 <h3 className="text-xl font-bold text-slate-900">무료 (Free)</h3>
-                <p className="text-xs text-slate-500 mt-1">월 기본료 0원, 1인 셀러 체험 & 린터 영구 무료</p>
+                <p className="text-xs text-slate-500 mt-1">{whitelabel.freeTierDescription}</p>
               </div>
 
               <div className="flex items-baseline gap-1 text-slate-900">

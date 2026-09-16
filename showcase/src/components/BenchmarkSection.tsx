@@ -19,12 +19,12 @@ export const BenchmarkSection: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto space-y-4 mb-16">
+        <div className="text-center max-w-3xl lg:max-w-4xl mx-auto space-y-4 mb-16">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-pastel-blue-50 border border-pastel-blue-200 text-pastel-blue-700 text-xs font-bold shadow-sm">
             <Gauge className="w-3.5 h-3.5" />
             <span>실측 벤치마크 데이터</span>
           </div>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 tracking-tight">
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
             말로만 하는 대용량이 아닙니다.<br />
             10만 건 데이터를 <span className="text-pastel-blue-600">약 50초</span> 만에 전처리·파티셔닝합니다.
           </h2>

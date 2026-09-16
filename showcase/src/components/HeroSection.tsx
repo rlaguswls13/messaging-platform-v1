@@ -10,8 +10,8 @@ export const HeroSection: React.FC = () => {
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[450px] bg-gradient-to-tr from-pastel-blue-200/50 via-sky-100/40 to-pastel-orange-200/40 blur-[130px] rounded-full pointer-events-none -z-10" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-4xl mx-auto space-y-6">
-          
+        <div className="text-center max-w-4xl lg:max-w-5xl mx-auto space-y-6">
+
           {/* Top Pill Badge */}
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/90 border border-pastel-blue-200 shadow-sm">
             <span className="flex h-2 w-2 relative">
@@ -26,8 +26,8 @@ export const HeroSection: React.FC = () => {
           </div>
 
           {/* Main Headline */}
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-900 leading-[1.18]">
-            보안은 <span className="text-pastel-blue-600 font-black">온프레미스급</span>, 내부 처리는 <span className="text-pastel-orange-500 font-black">초당 2,000건</span>,<br />
+          <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-slate-900 leading-[1.18]">
+            보안은 <span className="text-pastel-blue-600 font-black">온프레미스급</span>, 전처리는 <span className="text-pastel-orange-500 font-black">초당 2,000건</span>,<br />
             템플릿은 <span className="gradient-text font-black">AI 2nd Brain</span>으로 3초 만에.
           </h1>
 
@@ -88,9 +88,9 @@ export const HeroSection: React.FC = () => {
               </div>
               <div>
                 <div className="text-xl font-black text-slate-900 tracking-tight flex items-baseline gap-1">
-                  92% <span className="text-xs text-sky-600 font-bold">토큰 절감</span>
+                  90%+ <span className="text-xs text-sky-600 font-bold">토큰 절감</span>
                 </div>
-                <div className="text-xs text-slate-500 font-medium">건당 1원 미만 초가성비 AI 제안</div>
+                <div className="text-xs text-slate-500 font-medium">건당 약 1원 초가성비 AI 제안</div>
               </div>
             </div>
           </div>

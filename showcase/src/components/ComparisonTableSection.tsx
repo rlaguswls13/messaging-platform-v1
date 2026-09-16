@@ -1,7 +1,10 @@
 ﻿import React from 'react';
-import { Layers, Download, CheckCircle2, ShieldCheck, Sparkles, Cpu, ExternalLink } from 'lucide-react';
+import { Layers, Download, CheckCircle2, ShieldCheck, Sparkles, Cpu, ExternalLink, Smartphone } from 'lucide-react';
+import { useWhitelabel } from '../context/WhitelabelContext';
 
 export const ComparisonTableSection: React.FC = () => {
+  const whitelabel = useWhitelabel();
+  const hasIntegrationHighlight = Boolean(whitelabel.integrationHighlightTitle);
   return (
     <section id="comparison" className="py-20 md:py-28 bg-white border-b border-slate-200 relative overflow-hidden">
       {/* Soft Background Ambient */}
@@ -62,15 +65,15 @@ export const ComparisonTableSection: React.FC = () => {
             />
           </div>
 
-          {/* 3 Value Summaries Under Table */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+          {/* Value Summaries Under Table */}
+          <div className={`grid grid-cols-1 md:grid-cols-3 ${hasIntegrationHighlight ? 'lg:grid-cols-4' : ''} gap-4 pt-2`}>
             <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-1.5">
               <div className="flex items-center gap-2 text-xs font-bold text-slate-900">
                 <Sparkles className="w-4 h-4 text-pastel-orange-500" />
-                <span>AI 토큰 비용 92% 절감</span>
+                <span>AI 토큰 비용 90%+ 절감</span>
               </div>
               <p className="text-[11px] text-slate-600 leading-relaxed">
-                법령 전문 주입 대신 2nd Brain Context Slicing 기법을 적용하여 건당 1원 미만의 극가성비로 완제 조립.
+                법령 전문 주입 대신 2nd Brain Context Slicing 기법을 적용하여 건당 약 1원(0.8~1.1원) 수준의 가성비로 완제 조립.
               </p>
             </div>
 
@@ -93,6 +96,18 @@ export const ComparisonTableSection: React.FC = () => {
                 10만 건 CSV 물리 파티셔닝 약 50초 실측 기록(발송 전 내부 처리) 및 자체 Netty 리액티브 SMTP 소켓 엔진 풀스택 구축 완료. 실제 발송 속도는 외부 채널 서버 상태에 따라 별도.
               </p>
             </div>
+
+            {hasIntegrationHighlight && (
+              <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-1.5">
+                <div className="flex items-center gap-2 text-xs font-bold text-slate-900">
+                  <Smartphone className="w-4 h-4 text-emerald-600" />
+                  <span>{whitelabel.integrationHighlightTitle}</span>
+                </div>
+                <p className="text-[11px] text-slate-600 leading-relaxed">
+                  {whitelabel.integrationHighlightDesc}
+                </p>
+              </div>
+            )}
           </div>
 
         </div>
