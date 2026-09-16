@@ -33,10 +33,9 @@ export interface PresetSample {
       tokens: number;
       costWon: number;
     };
-    lms: {
+    rcs: {
       title: string;
-      body: string;
-      byteCount: number;
+      cards: { title: string; body: string; buttonText: string }[];
       complianceChecked: string[];
       tokens: number;
       costWon: number;
@@ -80,13 +79,16 @@ export const DEMO_PRESETS: PresetSample[] = [
         tokens: 380,
         costWon: 1.2,
       },
-      lms: {
-        title: '(광고) [모두의마켓] 추석 사전예약 30% 안내',
-        body: `(광고) [모두의마켓] 추석 사전예약\n#{고객명}님, 한가위 명품 선물세트 얼리버드가 시작되었습니다.\n\n- 혜택: 전 품목 최대 30% 즉시할인\n- 마감: 9/25(금) 18:00\n- 링크: bit.ly/chuseok-2026\n\n무료수신거부 080-880-1234`,
-        byteCount: 184,
-        complianceChecked: ['80바이트 초과 LMS 자동 분기', '전기통신사업법 사전등록 발신번호 검증', '080 무료수신거부 번호 포함'],
-        tokens: 280,
-        costWon: 0.8,
+      rcs: {
+        title: '추석 얼리버드 선물세트 캐러셀',
+        cards: [
+          { title: '1++ 한우 선물세트 30%', body: '프리미엄 한우 세트 사전예약 즉시 할인', buttonText: '한우세트 보기' },
+          { title: '명품 청과 선물세트', body: '엄선된 과일 세트 + 보냉백 무료 증정', buttonText: '청과세트 보기' },
+          { title: '무료배송 마감 D-3', body: '9/25(금) 18:00까지 예약 시 전 상품 무료배송', buttonText: '전체 상품 보기' },
+        ],
+        complianceChecked: ['RCS Biz 캐러셀 카드 규격(1:1) 검증', '통신 3사 RCS 게이트웨이 연동', '카드별 CTA 버튼 자동 배치'],
+        tokens: 460,
+        costWon: 1.6,
       }
     }
   },
@@ -125,13 +127,16 @@ export const DEMO_PRESETS: PresetSample[] = [
         tokens: 360,
         costWon: 1.1,
       },
-      lms: {
-        title: '(광고) [블루빈커피] 성수 오픈 100원 쿠폰',
-        body: `(광고) [블루빈커피] 성수 오픈 이벤트\n#{고객명}님, 성수 플래그십 스토어 오픈 기념!\n\n- 아메리카노 100원 쿠폰 발급\n- 선착순 300명 한정\n- 쿠폰받기: bit.ly/bluebean-open\n\n무료수신거부 080-880-1234`,
-        byteCount: 172,
-        complianceChecked: ['야간 발송 차단 룰셋 통과', '080 무료수신거부 완비', '단축 URL 유효성 검증'],
-        tokens: 270,
-        costWon: 0.8,
+      rcs: {
+        title: '성수 플래그십 오픈 이벤트 캐러셀',
+        cards: [
+          { title: '아메리카노 100원', body: '오픈 기념 선착순 300명 한정 100원 쿠폰', buttonText: '쿠폰 받기' },
+          { title: '시그니처 라떼 20% 할인', body: '신메뉴 시그니처 라떼 오픈 기념 할인가', buttonText: '메뉴 보기' },
+          { title: '성수 플래그십 찾아오는 길', body: '성수동 매장 위치 및 영업시간 안내', buttonText: '지도로 보기' },
+        ],
+        complianceChecked: ['RCS Biz 캐러셀 카드 규격(1:1) 검증', '통신 3사 RCS 게이트웨이 연동', '카드별 CTA 버튼 자동 배치'],
+        tokens: 440,
+        costWon: 1.5,
       }
     }
   },
@@ -170,13 +175,16 @@ export const DEMO_PRESETS: PresetSample[] = [
         tokens: 390,
         costWon: 1.2,
       },
-      lms: {
-        title: '(광고) [OmniFlow] AI 서밋 초대 안내',
-        body: `(광고) [OmniFlow] 2026 AI 서밋\n#{고객명}님, SaaS 아키텍처 컨퍼런스에 초대합니다.\n\n- 일시: 10/15(목) 14시 코엑스\n- 참가비: 무료 (사전등록 시)\n- 신청: bit.ly/saas-summit-2026\n\n무료수신거부 080-880-1234`,
-        byteCount: 180,
-        complianceChecked: ['발신번호 등록제 준수', '080 무료수신거부 필수 표기', '글자수 바이트 체크 통과'],
-        tokens: 280,
-        costWon: 0.8,
+      rcs: {
+        title: '2026 AI SaaS 서밋 초대 캐러셀',
+        cards: [
+          { title: 'VIP 세션 초대', body: '온프레미스급 보안 아키텍처 실전 세션', buttonText: '세션 신청' },
+          { title: '네트워킹 라운지', body: '업계 리더와의 1:1 네트워킹 기회', buttonText: '참가 신청' },
+          { title: '얼리버드 사전등록 혜택', body: '지금 등록 시 한정 굿즈 증정', buttonText: '사전등록' },
+        ],
+        complianceChecked: ['RCS Biz 캐러셀 카드 규격(1:1) 검증', '통신 3사 RCS 게이트웨이 연동', '카드별 CTA 버튼 자동 배치'],
+        tokens: 470,
+        costWon: 1.7,
       }
     }
   }

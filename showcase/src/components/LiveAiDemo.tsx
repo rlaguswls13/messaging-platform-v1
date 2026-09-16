@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { DEMO_PRESETS, PresetSample } from '../data/demoPresets';
-import { Sparkles, CheckCircle2, AlertTriangle, Smartphone, Mail, MessageSquare, Flame, Cpu, RefreshCw } from 'lucide-react';
+import { Sparkles, CheckCircle2, AlertTriangle, Mail, MessageSquare, Flame, Cpu, RefreshCw, GalleryHorizontal } from 'lucide-react';
 
-type ChannelTab = 'kakaoAlimtalk' | 'kakaoFriendtalk' | 'email' | 'lms';
+type ChannelTab = 'kakaoAlimtalk' | 'kakaoFriendtalk' | 'email' | 'rcs';
 
 export const LiveAiDemo: React.FC = () => {
   const [selectedPresetId, setSelectedPresetId] = useState<string>('chuseok');
@@ -147,15 +147,15 @@ export const LiveAiDemo: React.FC = () => {
                 </button>
 
                 <button
-                  onClick={() => { setChannelTab('lms'); triggerGenerationAnimation(); }}
+                  onClick={() => { setChannelTab('rcs'); triggerGenerationAnimation(); }}
                   className={`flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-xs font-bold transition-all ${
-                    channelTab === 'lms'
+                    channelTab === 'rcs'
                       ? 'bg-pastel-orange-500 text-white shadow-sm shadow-pastel-orange-500/20'
                       : 'bg-slate-50 text-slate-700 border border-slate-200 hover:bg-slate-100'
                   }`}
                 >
-                  <Smartphone className="w-3.5 h-3.5" />
-                  통신사 LMS 문자
+                  <GalleryHorizontal className="w-3.5 h-3.5" />
+                  통신사 RCS (캐러셀)
                 </button>
               </div>
 
@@ -242,14 +242,14 @@ export const LiveAiDemo: React.FC = () => {
                 <div className="bg-white px-4 py-3 border-b border-slate-200 flex items-center justify-between shadow-xs">
                   <div className="flex items-center gap-2.5">
                     <div className="w-8 h-8 rounded-full bg-amber-400 flex items-center justify-center text-slate-900 font-black text-xs shadow-xs">
-                      {channelTab === 'email' ? '✉️' : channelTab === 'lms' ? '문자' : '톡'}
+                      {channelTab === 'email' ? '✉️' : channelTab === 'rcs' ? 'RCS' : '톡'}
                     </div>
                     <div>
                       <div className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
                         {channelTab === 'email'
                           ? 'OmniFlow Mailer'
-                          : channelTab === 'lms'
-                          ? '1588-0000 (사전등록 발신번호)'
+                          : channelTab === 'rcs'
+                          ? '1588-0000 (RCS Biz 발신번호)'
                           : '공식 비즈니스 채널'}
                         <CheckCircle2 className="w-3 h-3 text-amber-500" />
                       </div>
@@ -258,8 +258,8 @@ export const LiveAiDemo: React.FC = () => {
                           ? '알림톡 인증 기관 · 정보성'
                           : channelTab === 'kakaoFriendtalk'
                           ? '인증된 발신 프로필 · 광고성'
-                          : channelTab === 'lms'
-                          ? '통신 3사 공식 발신번호 사전등록'
+                          : channelTab === 'rcs'
+                          ? '통신 3사 RCS Biz 채널 인증'
                           : '발신 도메인 인증 완료'}
                       </div>
                     </div>
@@ -304,41 +304,42 @@ export const LiveAiDemo: React.FC = () => {
                   )}
 
                   {/* 카카오 친구톡: 광고 말풍선 — 와이드 이미지 + 굵은 CTA */}
-                  {channelTab === 'kakaoFriendtalk' && 'title' in channelData && (
-                    <div className="bg-[#FFF7DB] rounded-2xl p-4 border border-amber-200 shadow-md space-y-3">
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-[11px] font-black px-1.5 py-0.5 rounded bg-amber-400 text-slate-900">(광고)</span>
-                        <span className="text-xs font-bold text-slate-900 tracking-tight">
-                          {channelData.title.replace(/^\(광고\)\s*/, '')}
-                        </span>
-                      </div>
-                      <div className="relative rounded-xl overflow-hidden border border-amber-200/70">
-                        <img
-                          src={currentPreset.imageUrl}
-                          alt={currentPreset.imageAlt}
-                          className="w-full h-36 object-cover"
-                        />
-                        <div className="absolute bottom-2 right-2 px-2 py-0.5 rounded bg-slate-900/80 backdrop-blur-md text-[10px] text-white font-medium">
-                          AI 멀티모달 최적화
+                  {channelTab === 'kakaoFriendtalk' && (() => {
+                    const friendtalkData = currentPreset.channels.kakaoFriendtalk;
+                    return (
+                      <div className="bg-[#FFF7DB] rounded-2xl p-4 border border-amber-200 shadow-md space-y-3">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-[11px] font-black px-1.5 py-0.5 rounded bg-amber-400 text-slate-900">(광고)</span>
+                          <span className="text-xs font-bold text-slate-900 tracking-tight">
+                            {friendtalkData.title.replace(/^\(광고\)\s*/, '')}
+                          </span>
                         </div>
-                      </div>
-                      <div className="text-xs text-slate-700 leading-relaxed whitespace-pre-line font-normal">
-                        {channelData.body}
-                      </div>
-                      {'buttonText' in channelData && (
+                        <div className="relative rounded-xl overflow-hidden border border-amber-200/70">
+                          <img
+                            src={currentPreset.imageUrl}
+                            alt={currentPreset.imageAlt}
+                            className="w-full h-36 object-cover"
+                          />
+                          <div className="absolute bottom-2 right-2 px-2 py-0.5 rounded bg-slate-900/80 backdrop-blur-md text-[10px] text-white font-medium">
+                            AI 멀티모달 최적화
+                          </div>
+                        </div>
+                        <div className="text-xs text-slate-700 leading-relaxed whitespace-pre-line font-normal">
+                          {friendtalkData.body}
+                        </div>
                         <div className="pt-1">
                           <button className="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm">
-                            <span>{channelData.buttonText}</span>
+                            <span>{friendtalkData.buttonText}</span>
                             <span className="text-slate-400">›</span>
                           </button>
                         </div>
-                      )}
-                      <div className="pt-2 border-t border-amber-200/70 flex items-center justify-between text-[10px] text-slate-500">
-                        <span>080-880-1234 무료수신거부</span>
-                        <span className="text-emerald-700 font-bold">과태료 위험 0%</span>
+                        <div className="pt-2 border-t border-amber-200/70 flex items-center justify-between text-[10px] text-slate-500">
+                          <span>080-880-1234 무료수신거부</span>
+                          <span className="text-emerald-700 font-bold">과태료 위험 0%</span>
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    );
+                  })()}
 
                   {/* 반응형 이메일: 발신자/제목/미리보기 헤더가 있는 메일함 뷰 */}
                   {channelTab === 'email' && 'subject' in channelData && (
@@ -374,21 +375,48 @@ export const LiveAiDemo: React.FC = () => {
                     </div>
                   )}
 
-                  {/* 통신사 LMS 문자: 이미지·버튼 없는 순수 텍스트 SMS 말풍선 */}
-                  {channelTab === 'lms' && 'byteCount' in channelData && (
-                    <div className="space-y-1.5">
-                      <div className="flex justify-end">
-                        <div className="max-w-[88%] bg-emerald-500 text-white rounded-2xl rounded-tr-sm px-3.5 py-2.5 text-xs leading-relaxed whitespace-pre-line shadow-sm">
-                          {channelData.body}
-                        </div>
+                  {/* 통신사 RCS: 가로 스와이프 캐러셀 카드형 — 카카오/문자와 구분되는 리치 UX */}
+                  {channelTab === 'rcs' && 'cards' in channelData && (
+                    <div className="bg-white rounded-2xl p-3.5 border border-slate-200 shadow-md space-y-2.5">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-indigo-100 text-indigo-700 font-black">
+                          RCS 캐러셀
+                        </span>
+                        <span className="text-xs font-bold text-slate-900 tracking-tight">
+                          {channelData.title}
+                        </span>
                       </div>
-                      <div className="flex justify-end items-center gap-1.5">
-                        <span className="text-[10px] text-slate-400 font-mono">
-                          {channelData.byteCount} / 2,000 bytes
-                        </span>
-                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 font-bold">
-                          {channelData.byteCount > 90 ? 'LMS(장문)' : 'SMS(단문)'}
-                        </span>
+
+                      <div className="flex gap-2.5 overflow-x-auto pb-1 -mx-1 px-1 snap-x snap-mandatory">
+                        {channelData.cards.map((card, idx) => (
+                          <div
+                            key={idx}
+                            className="snap-start shrink-0 w-36 rounded-xl border border-slate-200 overflow-hidden bg-slate-50 shadow-xs"
+                          >
+                            <div className="relative">
+                              <img
+                                src={currentPreset.imageUrl}
+                                alt={currentPreset.imageAlt}
+                                className="w-full h-24 object-cover"
+                              />
+                              <span className="absolute top-1.5 left-1.5 text-[9px] px-1.5 py-0.5 rounded-full bg-white/90 text-slate-700 font-bold">
+                                {idx + 1}/{channelData.cards.length}
+                              </span>
+                            </div>
+                            <div className="p-2.5 space-y-1">
+                              <div className="text-[11px] font-bold text-slate-900 leading-snug">{card.title}</div>
+                              <div className="text-[10px] text-slate-500 leading-snug line-clamp-2">{card.body}</div>
+                              <button className="w-full mt-1 py-1.5 rounded-lg bg-slate-900 text-white text-[10px] font-bold">
+                                {card.buttonText}
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-400">
+                        <span>← 좌우로 스와이프하여 카드 확인 →</span>
+                        <span className="text-emerald-700 font-bold">통신 3사 RCS 인증</span>
                       </div>
                     </div>
                   )}
