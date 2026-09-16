@@ -201,8 +201,8 @@ export const DashboardSection: React.FC = () => {
             <span>1) 대시보드 : 발송, 클릭, 오픈, 고객 수 실시간 분석</span>
           </div>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 tracking-tight">
-            구글 서치콘솔 & Ads와 똑같은<br />
-            <span className="gradient-text font-black">통합 마케팅 성과 대시보드</span>
+            일반 소비자도 편안하게 쓰는<br />
+            <span className="gradient-text font-black">직관적인 통합 마케팅 성과 대시보드</span>
           </h2>
           <p className="text-slate-600 text-base sm:text-lg">
             발송 건수, 오픈율, 클릭률(CTR), 도달 고객 수를 한눈에 비교 분석하세요.
