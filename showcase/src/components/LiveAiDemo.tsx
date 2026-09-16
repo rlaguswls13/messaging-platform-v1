@@ -242,15 +242,25 @@ export const LiveAiDemo: React.FC = () => {
                 <div className="bg-white px-4 py-3 border-b border-slate-200 flex items-center justify-between shadow-xs">
                   <div className="flex items-center gap-2.5">
                     <div className="w-8 h-8 rounded-full bg-amber-400 flex items-center justify-center text-slate-900 font-black text-xs shadow-xs">
-                      {channelTab === 'email' ? '✉️' : '톡'}
+                      {channelTab === 'email' ? '✉️' : channelTab === 'lms' ? '문자' : '톡'}
                     </div>
                     <div>
                       <div className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
-                        {channelTab === 'email' ? 'OmniFlow Mailer' : '공식 비즈니스 채널'}
+                        {channelTab === 'email'
+                          ? 'OmniFlow Mailer'
+                          : channelTab === 'lms'
+                          ? '1588-0000 (사전등록 발신번호)'
+                          : '공식 비즈니스 채널'}
                         <CheckCircle2 className="w-3 h-3 text-amber-500" />
                       </div>
                       <div className="text-[10px] text-slate-500">
-                        {channelTab === 'kakaoAlimtalk' ? '알림톡 인증 기관' : '인증된 발신 프로필'}
+                        {channelTab === 'kakaoAlimtalk'
+                          ? '알림톡 인증 기관 · 정보성'
+                          : channelTab === 'kakaoFriendtalk'
+                          ? '인증된 발신 프로필 · 광고성'
+                          : channelTab === 'lms'
+                          ? '통신 3사 공식 발신번호 사전등록'
+                          : '발신 도메인 인증 완료'}
                       </div>
                     </div>
                   </div>
@@ -261,7 +271,7 @@ export const LiveAiDemo: React.FC = () => {
 
                 {/* Message Canvas Area */}
                 <div className="p-4 flex-1 space-y-3 overflow-y-auto">
-                  
+
                   {/* Channel Tag Badge */}
                   <div className="flex items-center justify-center">
                     <span className="text-[10px] px-3 py-0.5 rounded-full bg-white text-slate-500 border border-slate-200 shadow-xs">
@@ -269,71 +279,119 @@ export const LiveAiDemo: React.FC = () => {
                     </span>
                   </div>
 
-                  {/* Render Message Body according to Tab */}
-                  <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-md space-y-3">
-                    
-                    {/* Header: Legal (광고) Tag Highlight */}
-                    {'title' in channelData && (
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-[11px] font-black px-1.5 py-0.5 rounded bg-amber-100 text-amber-900 border border-amber-300">
-                            법적 표기 준수
-                          </span>
-                          <span className="text-xs font-bold text-slate-900 tracking-tight">
-                            {channelData.title}
-                          </span>
-                        </div>
+                  {/* 카카오 알림톡: 정보성 템플릿 — 이미지 없는 흰색 카드 + 승인코드 + 아웃라인 버튼 */}
+                  {channelTab === 'kakaoAlimtalk' && 'templateName' in channelData && (
+                    <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-md space-y-3">
+                      <div className="flex items-center gap-1.5 text-[10px] text-slate-500">
+                        <span className="px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 font-bold">알림톡 템플릿</span>
+                        <span className="font-mono text-slate-400">{channelData.templateName}</span>
                       </div>
-                    )}
-
-                    {/* Email Subject View if Email */}
-                    {channelTab === 'email' && 'subject' in channelData && (
-                      <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200 text-xs">
-                        <div className="text-slate-500 text-[10px] mb-0.5">제목:</div>
-                        <div className="text-slate-900 font-bold">{channelData.subject}</div>
+                      <div className="text-xs font-bold text-slate-900 tracking-tight leading-relaxed">
+                        {channelData.title}
                       </div>
-                    )}
-
-                    {/* Image Attachment inside Message */}
-                    <div className="relative rounded-xl overflow-hidden border border-slate-200">
-                      <img
-                        src={currentPreset.imageUrl}
-                        alt={currentPreset.imageAlt}
-                        className="w-full h-36 object-cover"
-                      />
-                      <div className="absolute bottom-2 right-2 px-2 py-0.5 rounded bg-slate-900/80 backdrop-blur-md text-[10px] text-white font-medium">
-                        AI 멀티모달 최적화
+                      <div className="text-xs text-slate-700 leading-relaxed whitespace-pre-line font-normal">
+                        {channelData.body}
                       </div>
-                    </div>
-
-                    {/* Body Text */}
-                    <div className="text-xs text-slate-700 leading-relaxed whitespace-pre-line font-normal">
-                      {'body' in channelData && channelData.body}
-                      {channelTab === 'email' && 'bodyHtml' in channelData && (
-                        <div
-                          className="text-xs text-slate-700"
-                          dangerouslySetInnerHTML={{ __html: channelData.bodyHtml }}
-                        />
-                      )}
-                    </div>
-
-                    {/* Button Link */}
-                    {'buttonText' in channelData && (
-                      <div className="pt-2">
-                        <button className="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm">
+                      <div className="pt-1">
+                        <button className="w-full py-2.5 rounded-lg border border-slate-300 bg-slate-50 hover:bg-slate-100 text-slate-800 text-xs font-bold flex items-center justify-center gap-1.5">
                           <span>{channelData.buttonText}</span>
-                          <span className="text-slate-400">›</span>
                         </button>
                       </div>
-                    )}
-
-                    {/* Legal Footer Info */}
-                    <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-500">
-                      <span>080-880-1234 무료수신거부</span>
-                      <span className="text-emerald-700 font-bold">과태료 위험 0%</span>
+                      <div className="pt-2 border-t border-slate-100 text-[10px] text-slate-400">
+                        정보성 메시지 (광고 아님) · 수신동의 예외 대상
+                      </div>
                     </div>
+                  )}
 
-                  </div>
+                  {/* 카카오 친구톡: 광고 말풍선 — 와이드 이미지 + 굵은 CTA */}
+                  {channelTab === 'kakaoFriendtalk' && 'title' in channelData && (
+                    <div className="bg-[#FFF7DB] rounded-2xl p-4 border border-amber-200 shadow-md space-y-3">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[11px] font-black px-1.5 py-0.5 rounded bg-amber-400 text-slate-900">(광고)</span>
+                        <span className="text-xs font-bold text-slate-900 tracking-tight">
+                          {channelData.title.replace(/^\(광고\)\s*/, '')}
+                        </span>
+                      </div>
+                      <div className="relative rounded-xl overflow-hidden border border-amber-200/70">
+                        <img
+                          src={currentPreset.imageUrl}
+                          alt={currentPreset.imageAlt}
+                          className="w-full h-36 object-cover"
+                        />
+                        <div className="absolute bottom-2 right-2 px-2 py-0.5 rounded bg-slate-900/80 backdrop-blur-md text-[10px] text-white font-medium">
+                          AI 멀티모달 최적화
+                        </div>
+                      </div>
+                      <div className="text-xs text-slate-700 leading-relaxed whitespace-pre-line font-normal">
+                        {channelData.body}
+                      </div>
+                      {'buttonText' in channelData && (
+                        <div className="pt-1">
+                          <button className="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm">
+                            <span>{channelData.buttonText}</span>
+                            <span className="text-slate-400">›</span>
+                          </button>
+                        </div>
+                      )}
+                      <div className="pt-2 border-t border-amber-200/70 flex items-center justify-between text-[10px] text-slate-500">
+                        <span>080-880-1234 무료수신거부</span>
+                        <span className="text-emerald-700 font-bold">과태료 위험 0%</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 반응형 이메일: 발신자/제목/미리보기 헤더가 있는 메일함 뷰 */}
+                  {channelTab === 'email' && 'subject' in channelData && (
+                    <div className="bg-white rounded-2xl border border-slate-200 shadow-md overflow-hidden">
+                      <div className="px-4 py-3 border-b border-slate-100 space-y-1">
+                        <div className="flex items-center justify-between text-[10px] text-slate-400">
+                          <span>보낸사람: OmniFlow Mailer &lt;no-reply@omniflow.io&gt;</span>
+                          <span>방금 전</span>
+                        </div>
+                        <div className="text-xs font-bold text-slate-900 leading-snug">{channelData.subject}</div>
+                        <div className="text-[11px] text-slate-500 truncate">{channelData.previewText}</div>
+                      </div>
+                      <div className="p-4 space-y-3">
+                        <div className="relative rounded-xl overflow-hidden border border-slate-200">
+                          <img
+                            src={currentPreset.imageUrl}
+                            alt={currentPreset.imageAlt}
+                            className="w-full h-36 object-cover"
+                          />
+                          <div className="absolute bottom-2 right-2 px-2 py-0.5 rounded bg-slate-900/80 backdrop-blur-md text-[10px] text-white font-medium">
+                            AI 멀티모달 최적화
+                          </div>
+                        </div>
+                        <div
+                          className="text-xs text-slate-700 leading-relaxed"
+                          dangerouslySetInnerHTML={{ __html: channelData.bodyHtml }}
+                        />
+                        <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-500">
+                          <span>수신거부 · 발신자 정보 보기</span>
+                          <span className="text-emerald-700 font-bold">SPF·DKIM 인증됨</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 통신사 LMS 문자: 이미지·버튼 없는 순수 텍스트 SMS 말풍선 */}
+                  {channelTab === 'lms' && 'byteCount' in channelData && (
+                    <div className="space-y-1.5">
+                      <div className="flex justify-end">
+                        <div className="max-w-[88%] bg-emerald-500 text-white rounded-2xl rounded-tr-sm px-3.5 py-2.5 text-xs leading-relaxed whitespace-pre-line shadow-sm">
+                          {channelData.body}
+                        </div>
+                      </div>
+                      <div className="flex justify-end items-center gap-1.5">
+                        <span className="text-[10px] text-slate-400 font-mono">
+                          {channelData.byteCount} / 2,000 bytes
+                        </span>
+                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 font-bold">
+                          {channelData.byteCount > 90 ? 'LMS(장문)' : 'SMS(단문)'}
+                        </span>
+                      </div>
+                    </div>
+                  )}
 
                 </div>
 
