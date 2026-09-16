@@ -22,5 +22,12 @@ Thumbs.db
 # Vite cache
 showcase/.vite/
 
+# Temp build & tool files
+.video_build/
+.omc/
+.claude/
+*.wav
+
 # Note: docs/ must be tracked for GitHub Pages
 !docs/
+

@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>OmniFlow 내부 전처리 파이프라인 및 6대 모듈 통신 구조</title>
+<style>
+  @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+  
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+  
+  body {
+    background: #ffffff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 24px;
+    width: 1180px;
+    margin: 0 auto;
+  }
+  
+  .card {
+    background: #ffffff;
+    width: 1130px;
+    border-radius: 20px;
+    box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.08), 0 0 0 1px rgba(203, 213, 225, 0.8);
+    overflow: hidden;
+  }
+  
+  /* Header */
+  .header {
+    padding: 20px 30px 16px;
+    background: linear-gradient(180deg, #eff6ff 0%, #ffffff 100%);
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
+  
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #dbeafe;
+    color: #1e40af;
+    border: 1px solid #bfdbfe;
+    padding: 4px 12px;
+    border-radius: 9999px;
+    font-size: 11.5px;
+    font-weight: 800;
+    margin-bottom: 6px;
+    letter-spacing: -0.2px;
+  }
+  
+  .title {
+    font-size: 22px;
+    font-weight: 800;
+    color: #0f172a;
+    letter-spacing: -0.5px;
+  }
+  
+  .subtitle {
+    font-size: 12px;
+    color: #475569;
+    margin-top: 4px;
+    font-weight: 500;
+  }
+  
+  .header-tag {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    color: #166534;
+    padding: 5px 12px;
+    border-radius: 8px;
+    font-size: 11.5px;
+    font-weight: 700;
+  }
+
+  /* Body Content */
+  .content {
+    padding: 18px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background: #ffffff;
+  }
+
+  /* Core Pipeline Banner */
+  .highlight-banner {
+    background: linear-gradient(90deg, #eff6ff 0%, #f0fdf4 50%, #eff6ff 100%);
+    border: 1.5px solid #bfdbfe;
+    border-radius: 12px;
+    padding: 10px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
+  .banner-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .banner-icon {
+    width: 32px;
+    height: 32px;
+    background: #2563eb;
+    color: #ffffff;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: 800;
+    flex-shrink: 0;
+  }
+  
+  .banner-title {
+    font-size: 13.5px;
+    font-weight: 800;
+    color: #0f172a;
+  }
+  
+  .banner-desc {
+    font-size: 11px;
+    color: #475569;
+    font-weight: 500;
+    margin-top: 1px;
+  }
+  
+  .banner-badge {
+    background: #1e40af;
+    color: #ffffff;
+    padding: 5px 12px;
+    border-radius: 6px;
+    font-size: 11.5px;
+    font-weight: 800;
+    letter-spacing: -0.2px;
+    white-space: nowrap;
+  }
+
+  /* Pipeline Zones */
+  .zone-box {
+    background: #ffffff;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 14px;
+    padding: 14px 16px;
+    position: relative;
+  }
+
+  .zone-box.internal {
+    border-color: #93c5fd;
+    background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+  }
+
+  .zone-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  .zone-title {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12.5px;
+    font-weight: 800;
+    color: #1e3a8a;
+  }
+
+  .zone-tag {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 5px;
+    background: #eff6ff;
+    color: #2563eb;
+    border: 1px solid #bfdbfe;
+  }
+
+  /* 5 Modules Row */
+  .modules-row {
+    display: flex;
+    align-items: stretch;
+    justify-content: space-between;
+    gap: 6px;
+  }
+
+  .module-card {
+    flex: 1;
+    background: #ffffff;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 10px 9px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+  }
+
+  .module-card.frontend { border-color: #cbd5e1; }
+  .module-card.backend { border-color: #c7d2fe; }
+  .module-card.target { border-color: #bae6fd; }
+  
+  .module-card.payloader {
+    flex: 1.25;
+    border-color: #3b82f6;
+    background: linear-gradient(180deg, #eff6ff 0%, #ffffff 100%);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);
+  }
+
+  .module-card.mq { border-color: #fde68a; }
+  .module-card.dispatcher { border-color: #bbf7d0; }
+
+  .mod-head {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 6px;
+  }
+
+  .mod-step {
+    width: 18px;
+    height: 18px;
+    border-radius: 5px;
+    background: #f1f5f9;
+    color: #475569;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 800;
+    flex-shrink: 0;
+  }
+
+  .mod-step.active { background: #2563eb; color: #ffffff; }
+  .mod-step.success { background: #16a34a; color: #ffffff; }
+
+  .mod-title {
+    font-size: 11.5px;
+    font-weight: 800;
+    color: #0f172a;
+    letter-spacing: -0.2px;
+  }
+
+  .mod-bullets {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    margin: 4px 0 8px;
+  }
+
+  .mod-bullets li {
+    font-size: 9.5px;
+    color: #334155;
+    line-height: 1.35;
+    padding-left: 9px;
+    position: relative;
+    font-weight: 600;
+  }
+
+  .mod-bullets li::before {
+    content: '•';
+    position: absolute;
+    left: 0;
+    color: #64748b;
+  }
+
+  .mod-bullets.blue li::before { color: #2563eb; }
+
+  .proto-tag {
+    font-size: 8.5px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+    text-align: center;
+    margin-top: auto;
+    border: 1px solid transparent;
+  }
+
+  .pt-http { background: #f1f5f9; color: #475569; border-color: #e2e8f0; }
+  .pt-rest { background: #e0e7ff; color: #3730a3; border-color: #c7d2fe; }
+  .pt-stream { background: #e0f2fe; color: #0369a1; border-color: #bae6fd; }
+  .pt-core { background: #dbeafe; color: #1e40af; border-color: #93c5fd; font-weight: 800; }
+  .pt-mq { background: #fef3c7; color: #92400e; border-color: #fde68a; }
+  .pt-netty { background: #dcfce7; color: #166534; border-color: #bbf7d0; font-weight: 700; }
+
+  /* Connector */
+  .arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 14px;
+    flex-shrink: 0;
+  }
+
+  .arrow svg { stroke: #94a3b8; }
+  .arrow.blue svg { stroke: #2563eb; }
+
+  /* Zone B: Outbound */
+  .external-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .dispatcher-col {
+    width: 260px;
+    flex-shrink: 0;
+  }
+
+  .divide-line {
+    width: 1.5px;
+    height: 75px;
+    background: repeating-linear-gradient(to bottom, #94a3b8, #94a3b8 4px, transparent 4px, transparent 8px);
+    flex-shrink: 0;
+  }
+
+  .ext-grid {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 7px;
+  }
+
+  .ext-card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 8px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .ext-name {
+    font-size: 10.5px;
+    font-weight: 800;
+    color: #0f172a;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .ext-desc {
+    font-size: 9px;
+    color: #475569;
+    line-height: 1.3;
+  }
+
+  .ext-status {
+    font-size: 8px;
+    color: #94a3b8;
+    margin-top: 2px;
+  }
+
+  /* Notice Callout Box */
+  .notice-callout {
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    border-left: 3.5px solid #f59e0b;
+    border-radius: 8px;
+    padding: 8px 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 10.5px;
+    color: #92400e;
+    line-height: 1.4;
+  }
+
+  .notice-callout strong {
+    color: #78350f;
+  }
+
+  /* Footer */
+  .footer {
+    padding: 10px 24px;
+    background: #ffffff;
+    border-top: 1px solid #e2e8f0;
+    font-size: 9.5px;
+    color: #64748b;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .source { font-weight: 700; color: #2563eb; }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <!-- Header -->
+  <div class="header">
+    <div>
+      <div class="badge">
+        <span>⚡</span>
+        <span>OmniFlow 코어 아키텍처 · 초당 약 2,000건 고속 전처리 파이프라인</span>
+      </div>
+      <h1 class="title">OmniFlow 내부 전처리 파이프라인 및 6대 모듈 통신 구조</h1>
+      <p class="subtitle">비동기 리액티브 소켓 기반의 템플릿 병합·개인화 데이터 주입 및 모듈 간 종단간 데이터 흐름</p>
+    </div>
+    <div class="header-tag">
+      <span>✔</span>
+      <span>내부 전처리 2,000 TPS 실측 검증 완료</span>
+    </div>
+  </div>
+
+  <div class="content">
+    
+    <!-- Top Highlight Banner -->
+    <div class="highlight-banner">
+      <div class="banner-left">
+        <div class="banner-icon">⚡</div>
+        <div>
+          <div class="banner-title">내부 전처리 파이프라인 : 초당 약 2,000건 발송 전(前) 데이터 처리</div>
+          <div class="banner-desc">비동기 리액티브 소켓(Project Reactor) 기반으로 템플릿 병합, 개인화 데이터 주입 및 법령 검증을 2,000 TPS 수준으로 초고속 처리</div>
+        </div>
+      </div>
+      <div class="banner-badge">발송 전(前) 2,000건/초 처리 실측</div>
+    </div>
+
+    <!-- Zone A: Internal Preprocessing Pipeline (5 Modules) -->
+    <div class="zone-box internal">
+      <div class="zone-header">
+        <div class="zone-title">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5">
+            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path>
+          </svg>
+          <span>발송 전(前) 내부 고속 전처리 파이프라인 (Zone A : Pure Internal Core)</span>
+        </div>
+        <span class="zone-tag">초당 약 2,000건 비동기 리액티브 스트리밍</span>
+      </div>
+
+      <div class="modules-row">
+        
+        <!-- Module 1: Frontend -->
+        <div class="module-card frontend">
+          <div>
+            <div class="mod-head">
+              <div class="mod-step">1</div>
+              <div class="mod-title">프론트엔드 모듈</div>
+            </div>
+            <ul class="mod-bullets">
+              <li>사장님 3-Click 간편 모드</li>
+              <li>고객 명부 CSV 업로드</li>
+            </ul>
+          </div>
+          <div class="proto-tag pt-http">HTTPS / WebSocket</div>
+        </div>
+
+        <!-- Arrow 1 -->
+        <div class="arrow">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke-width="2.5">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </div>
+
+        <!-- Module 2: Backend -->
+        <div class="module-card backend">
+          <div>
+            <div class="mod-head">
+              <div class="mod-step">2</div>
+              <div class="mod-title">백엔드 API 서버</div>
+            </div>
+            <ul class="mod-bullets">
+              <li>캠페인 생성 및 인증</li>
+              <li>실시간 상태 피드백</li>
+            </ul>
+          </div>
+          <div class="proto-tag pt-rest">내부 REST / gRPC</div>
+        </div>
+
+        <!-- Arrow 2 -->
+        <div class="arrow">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke-width="2.5">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </div>
+
+        <!-- Module 3: Targeting -->
+        <div class="module-card target">
+          <div>
+            <div class="mod-head">
+              <div class="mod-step">3</div>
+              <div class="mod-title">타겟 모듈</div>
+            </div>
+            <ul class="mod-bullets">
+              <li>대용량 CSV 스트리밍 파싱</li>
+              <li>청크(Chunk) 분할 및 파티셔닝</li>
+            </ul>
+          </div>
+          <div class="proto-tag pt-stream">리액티브 Chunk Stream</div>
+        </div>
+
+        <!-- Arrow 3 (Blue) -->
+        <div class="arrow blue">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke-width="3">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </div>
+
+        <!-- Module 4: Payloader (CORE) -->
+        <div class="module-card payloader">
+          <div>
+            <div class="mod-head">
+              <div class="mod-step active">4</div>
+              <div class="mod-title" style="color:#1e40af;">데이터(Payloader) 모듈</div>
+            </div>
+            <ul class="mod-bullets blue">
+              <li><strong>⚡ 초당 약 2,000건 전처리</strong></li>
+              <li>템플릿 치환 & 개인화 데이터 주입</li>
+              <li>2nd Brain 규제 린터(광고/080) 검증</li>
+            </ul>
+          </div>
+          <div class="proto-tag pt-core">비동기 리액티브 소켓</div>
+        </div>
+
+        <!-- Arrow 4 -->
+        <div class="arrow">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke-width="2.5">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </div>
+
+        <!-- Module 5: MQ Server -->
+        <div class="module-card mq">
+          <div>
+            <div class="mod-head">
+              <div class="mod-step">5</div>
+              <div class="mod-title">고성능 MQ 서버</div>
+            </div>
+            <ul class="mod-bullets">
+              <li>RabbitMQ / Kafka 버퍼링</li>
+              <li>트래픽 서지 완충 & DLQ 보존</li>
+            </ul>
+          </div>
+          <div class="proto-tag pt-mq">AMQP / TCP Queue</div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Zone B: Outbound Dispatch & External Channels -->
+    <div class="zone-box">
+      <div class="zone-header">
+        <div class="zone-title">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5">
+            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+            <line x1="8" y1="21" x2="16" y2="21"></line>
+            <line x1="12" y1="17" x2="12" y2="21"></line>
+          </svg>
+          <span style="color:#166534;">발송 모듈 및 외부 채널 연동 파이프라인 (Zone B)</span>
+        </div>
+        <span class="zone-tag" style="background:#fef2f2; color:#b91c1c; border-color:#fecaca;">외부 채널 서버 상태 의존 (별도 영역)</span>
+      </div>
+
+      <div class="external-row">
+        
+        <!-- Module 6: Dispatcher -->
+        <div class="module-card dispatcher dispatcher-col">
+          <div>
+            <div class="mod-head">
+              <div class="mod-step success">6</div>
+              <div class="mod-title" style="color:#166534;">발송 모듈 (Dispatcher)</div>
+            </div>
+            <ul class="mod-bullets">
+              <li>Netty 비동기 I/O 다채널 병렬 전송</li>
+              <li>카카오 알림톡 실패 시 문자로 즉시 전환 (Failover)</li>
+            </ul>
+          </div>
+          <div class="proto-tag pt-netty">Netty Non-blocking Socket</div>
+        </div>
+
+        <!-- Arrow -->
+        <div class="arrow">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke-width="2.5">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </div>
+
+        <!-- Divide Line -->
+        <div class="divide-line"></div>
+
+        <!-- 4 External Channels -->
+        <div class="ext-grid">
+          
+          <div class="ext-card">
+            <div class="ext-name">💬 카카오 알림톡</div>
+            <div class="ext-desc">공식 딜러사 API 승인 템플릿</div>
+            <div class="ext-status">※ 카카오 수용량 연동</div>
+          </div>
+
+          <div class="ext-card">
+            <div class="ext-name">📱 통신사 SMS/LMS</div>
+            <div class="ext-desc">알림톡 실패 시 자동 Failover</div>
+            <div class="ext-status">※ 통신사 교환기 처리율 연동</div>
+          </div>
+
+          <div class="ext-card">
+            <div class="ext-name">📧 Netty 대량 메일</div>
+            <div class="ext-desc">Port 25 통신 원가 0원 엔진</div>
+            <div class="ext-status">※ 수신사 MX 메일박스 연동</div>
+          </div>
+
+          <div class="ext-card">
+            <div class="ext-name">🔔 모바일 푸시</div>
+            <div class="ext-desc">Google FCM v1 & Apple APNs</div>
+            <div class="ext-status">※ 글로벌 푸시 서버 연동</div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Notice Box -->
+    <div class="notice-callout">
+      <span>⚠️</span>
+      <div>
+        <strong>발송 속도 영역 분리:</strong> 발송 전(前) 내부 처리는 초당 약 2,000건 수준으로 설계·검증했으나, <strong>최종 발송 속도는 카카오·통신사·이메일 등 외부 채널 서버 상태에 의존하는 별도 영역</strong>입니다.
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <div>
+      <span>OmniFlow: 소상공인 안심형 마케팅 포털 · 고속 비동기 리액티브 메시징 엔진</span>
+      <span>•</span>
+      <span class="source">https://rlaguswls13.github.io/messaging-platform-v1/</span>
+    </div>
+    <div>OmniFlow v1.0 • 중소벤처기업부 모두의 창업 2기</div>
+  </div>
+</div>
+
+</body>
+</html>

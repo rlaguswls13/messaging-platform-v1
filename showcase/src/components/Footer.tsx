@@ -50,6 +50,28 @@ export const Footer: React.FC = () => {
               <li><span>2nd Brain 실시간 법령 위키 연계</span></li>
               <li><span>통신 3사 및 카카오 공식 딜러사 파이프라인</span></li>
               <li><span>Netty TCP Port 25 SMTP 자체 인프라</span></li>
+              <li>
+                <a
+                  href="video_player.html"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1 text-emerald-400 hover:text-emerald-300 font-semibold transition-colors"
+                >
+                  <span>🎥 3분 소개 영상 시청</span>
+                  <ExternalLink className="w-3 h-3" />
+                </a>
+              </li>
+              <li>
+                <a
+                  href="video_teleprompter.html"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1 text-pastel-orange-400 hover:text-pastel-orange-300 font-semibold transition-colors"
+                >
+                  <span>🎬 3분 IR 피칭 프롬프터</span>
+                  <ExternalLink className="w-3 h-3" />
+                </a>
+              </li>
             </ul>
           </div>
 

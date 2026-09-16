@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>OmniFlow AWS 인프라 구성 및 보안 네트워크 아키텍처</title>
+<style>
+  @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+  
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+  
+  body {
+    background: #ffffff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    width: 1140px;
+    margin: 0 auto;
+  }
+  
+  .card {
+    background: #ffffff;
+    width: 1100px;
+    border-radius: 20px;
+    box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.08), 0 0 0 1px rgba(203, 213, 225, 0.8);
+    overflow: hidden;
+  }
+  
+  .header {
+    padding: 22px 32px 18px;
+    background: linear-gradient(180deg, #eff6ff 0%, #ffffff 100%);
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
+  
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #dbeafe;
+    color: #1e40af;
+    border: 1px solid #bfdbfe;
+    padding: 4px 12px;
+    border-radius: 9999px;
+    font-size: 11.5px;
+    font-weight: 800;
+    margin-bottom: 8px;
+    letter-spacing: -0.2px;
+  }
+  
+  .title {
+    font-size: 23px;
+    font-weight: 800;
+    color: #0f172a;
+    letter-spacing: -0.6px;
+  }
+  
+  .subtitle {
+    font-size: 13px;
+    color: #475569;
+    margin-top: 4px;
+    font-weight: 500;
+  }
+  
+  .meta-tag {
+    font-size: 12px;
+    color: #047857;
+    background: #ecfdf5;
+    border: 1px solid #a7f3d0;
+    padding: 6px 14px;
+    border-radius: 10px;
+    font-weight: 800;
+    letter-spacing: -0.2px;
+  }
+  
+  /* Diagram Main Body */
+  .diagram-body {
+    padding: 22px 28px 18px;
+    background: #ffffff;
+    display: flex;
+    gap: 16px;
+    align-items: stretch;
+  }
+  
+  /* Column 1: Outbound Modules */
+  .col-outbound {
+    width: 232px;
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    flex-shrink: 0;
+  }
+  
+  .module-box {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 9px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    position: relative;
+  }
+  
+  .module-box::after {
+    content: '';
+    position: absolute;
+    right: -12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 11px;
+    height: 1.5px;
+    background: #cbd5e1;
+  }
+  
+  .module-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4px;
+    font-size: 12.5px;
+    font-weight: 800;
+    color: #1e293b;
+    white-space: nowrap;
+  }
+  
+  .module-desc {
+    font-size: 10.5px;
+    color: #64748b;
+    font-weight: 500;
+    line-height: 1.35;
+  }
+  
+  .tag-ext {
+    display: inline-block;
+    padding: 1.5px 6px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    background: #e0f2fe;
+    color: #0369a1;
+    border: 1px solid #bae6fd;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  
+  .logging-box {
+    background: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    margin-top: auto;
+  }
+  
+  /* Middle VPC Container */
+  .vpc-container {
+    flex: 1;
+    background: #f8fafc;
+    border: 1.5px dashed #94a3b8;
+    border-radius: 16px;
+    padding: 14px 16px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .vpc-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #e2e8f0;
+    padding-bottom: 8px;
+  }
+  
+  .vpc-title {
+    font-size: 12.5px;
+    font-weight: 800;
+    color: #0f172a;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  
+  .vpc-badge {
+    font-size: 10.5px;
+    font-weight: 700;
+    color: #475569;
+    background: #e2e8f0;
+    padding: 2px 8px;
+    border-radius: 6px;
+  }
+  
+  .vpc-grid {
+    display: flex;
+    gap: 14px;
+    flex: 1;
+  }
+  
+  /* Subnet 1: MQ */
+  .subnet-mq {
+    flex: 1;
+    background: #ffffff;
+    border: 1px solid #bfdbfe;
+    border-radius: 14px;
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.04);
+  }
+  
+  .subnet-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11.5px;
+    font-weight: 800;
+    color: #1e40af;
+    background: #eff6ff;
+    padding: 4px 10px;
+    border-radius: 8px;
+    border: 1px solid #dbeafe;
+  }
+  
+  .mq-body {
+    flex: 1;
+    background: #f8fbff;
+    border: 1px solid #dbeafe;
+    border-radius: 10px;
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+    gap: 6px;
+  }
+  
+  .mq-title {
+    font-size: 14.5px;
+    font-weight: 800;
+    color: #0f172a;
+  }
+  
+  .mq-badge {
+    display: inline-block;
+    padding: 2.5px 8px;
+    background: #dbeafe;
+    color: #1d4ed8;
+    border-radius: 6px;
+    font-size: 10.5px;
+    font-weight: 700;
+  }
+  
+  .mq-list {
+    list-style: none;
+    text-align: left;
+    font-size: 10.5px;
+    color: #475569;
+    line-height: 1.45;
+    margin-top: 4px;
+  }
+  
+  .mq-list li {
+    position: relative;
+    padding-left: 11px;
+    margin-bottom: 2px;
+  }
+  
+  .mq-list li::before {
+    content: '•';
+    position: absolute;
+    left: 1px;
+    color: #3b82f6;
+    font-weight: bold;
+  }
+  
+  /* Connector */
+  .bus-connector {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    width: 20px;
+    flex-shrink: 0;
+  }
+  
+  /* Subnet 2: Core Processing */
+  .subnet-core {
+    flex: 1.15;
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 14px;
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+  }
+  
+  .subnet-header-core {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11.5px;
+    font-weight: 800;
+    color: #0f172a;
+    background: #f1f5f9;
+    padding: 4px 10px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+  }
+  
+  .core-modules {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+  
+  .core-item {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 7px 11px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  
+  .core-item-title {
+    font-size: 11.5px;
+    font-weight: 800;
+    color: #1e293b;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  
+  .core-item-desc {
+    font-size: 10px;
+    color: #64748b;
+    font-weight: 500;
+  }
+  
+  /* Subnet 3 & 4: Tenant DBs */
+  .bottom-dbs {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 10px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .db-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11.5px;
+    font-weight: 800;
+    color: #334155;
+    white-space: nowrap;
+  }
+  
+  .db-grid {
+    display: flex;
+    gap: 12px;
+  }
+  
+  .db-card {
+    flex: 1;
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .db-icon {
+    width: 26px;
+    height: 26px;
+    background: #dbeafe;
+    border: 1px solid #bfdbfe;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #1e40af;
+    font-size: 13px;
+    flex-shrink: 0;
+  }
+  
+  .db-info {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .db-name {
+    font-size: 11px;
+    font-weight: 800;
+    color: #0f172a;
+  }
+  
+  .db-sub {
+    font-size: 9.5px;
+    color: #64748b;
+  }
+  
+  .db-note {
+    font-size: 10px;
+    color: #0369a1;
+    background: #f0f9ff;
+    border: 1px solid #e0f2fe;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-weight: 600;
+    line-height: 1.35;
+  }
+  
+  /* Column 3: Security & External */
+  .col-security {
+    width: 245px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+  
+  .security-gateway {
+    background: linear-gradient(180deg, #fffbeb 0%, #ffffff 100%);
+    border: 1.5px solid #fde68a;
+    border-radius: 14px;
+    padding: 11px 13px;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.05);
+  }
+  
+  .sec-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11.5px;
+    font-weight: 800;
+    color: #92400e;
+  }
+  
+  .sec-rules {
+    list-style: none;
+    font-size: 10px;
+    color: #78350f;
+    line-height: 1.45;
+  }
+  
+  .sec-rules li {
+    position: relative;
+    padding-left: 11px;
+    margin-bottom: 3px;
+  }
+  
+  .sec-rules li::before {
+    content: '✔';
+    position: absolute;
+    left: 0;
+    color: #d97706;
+    font-size: 9px;
+  }
+  
+  .external-net {
+    flex: 1;
+    background: #0f172a;
+    color: #ffffff;
+    border-radius: 14px;
+    padding: 14px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.15);
+  }
+  
+  .ext-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12.5px;
+    font-weight: 800;
+    color: #38bdf8;
+    border-bottom: 1px solid #334155;
+    padding-bottom: 6px;
+  }
+  
+  .ext-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    flex: 1;
+    justify-content: center;
+  }
+  
+  .ext-item {
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 8px;
+    padding: 7px 9px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  
+  .ext-item-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: #f1f5f9;
+  }
+  
+  .ext-item-desc {
+    font-size: 9.5px;
+    color: #94a3b8;
+  }
+  
+  /* Footer */
+  .footer {
+    padding: 12px 32px;
+    background: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 11px;
+    color: #64748b;
+  }
+  
+  .footer-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .source {
+    color: #2563eb;
+    font-weight: 700;
+  }
+  
+  .footnote {
+    font-size: 10px;
+    color: #94a3b8;
+  }
+</style>
+</head>
+<body>
+
+<div class="card" id="capture-target">
+  <!-- Header -->
+  <div class="header">
+    <div>
+      <div class="badge">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+        </svg>
+        모두의 창업 2기 클라우드 보안 아키텍처
+      </div>
+      <div class="title">OmniFlow AWS 인프라 구성 및 메시징 보안망</div>
+      <div class="subtitle">네트워크 안정성을 위한 다중 사설망(VPC Private Subnet) 분리 및 엔터프라이즈 보안 게이트웨이 체계</div>
+    </div>
+    <div class="meta-tag">
+      ✓ 금융권 보안 가이드라인 준수 설계
+    </div>
+  </div>
+
+  <!-- Main Diagram Body -->
+  <div class="diagram-body">
+    
+    <!-- Column 1: Outbound Dispatchers -->
+    <div class="col-outbound">
+      <div class="module-box" style="border-left: 3px solid #2563eb;">
+        <div class="module-header">
+          <span>SMTP Port 25 발송모듈</span>
+          <span class="tag-ext">외부연결</span>
+        </div>
+        <div class="module-desc">Netty 비동기 엔진 · 통신 원가 0원 대량 메일</div>
+      </div>
+
+      <div class="module-box" style="border-left: 3px solid #0284c7;">
+        <div class="module-header">
+          <span>모바일 푸시 발송모듈</span>
+          <span class="tag-ext">외부연결</span>
+        </div>
+        <div class="module-desc">FCM v1 / Apple APNs 직결 비동기 파이프라인</div>
+      </div>
+
+      <div class="module-box" style="border-left: 3px solid #f59e0b;">
+        <div class="module-header">
+          <span>카카오 알림톡 모듈</span>
+          <span class="tag-ext">외부연결</span>
+        </div>
+        <div class="module-desc">공식 딜러사 API 연동 · 사전 승인 템플릿</div>
+      </div>
+
+      <div class="module-box" style="border-left: 3px solid #10b981;">
+        <div class="module-header">
+          <span>통신사 SMS/LMS 모듈</span>
+          <span class="tag-ext">외부연결</span>
+        </div>
+        <div class="module-desc">알림톡 실패 시 문자로 즉시 전환 (Failover)</div>
+      </div>
+
+      <div class="module-box logging-box" style="border-left: 3px solid #64748b;">
+        <div class="module-header">
+          <span>실시간 로깅 네트워크</span>
+          <span class="tag-ext">외부연결</span>
+        </div>
+        <div class="module-desc">발송·오픈·클릭·도달수 분산 수집 및 실시간 집계</div>
+      </div>
+    </div>
+
+    <!-- Column 2: AWS VPC Internal Private Subnets -->
+    <div class="vpc-container">
+      <div class="vpc-header">
+        <div class="vpc-title">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.2">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+          </svg>
+          AWS VPC 내부 격리 보안망 (AWS Private Subnet Zones)
+        </div>
+        <div class="vpc-badge">인터넷 직접 노출 원천 차단 (Pure Internal)</div>
+      </div>
+
+      <div class="vpc-grid">
+        <!-- Subnet 1: MQ -->
+        <div class="subnet-mq">
+          <div class="subnet-header">
+            <span>🔒 AWS Private 네트워크 1망</span>
+          </div>
+          <div class="mq-body">
+            <div class="mq-title">고성능 MQ 서버</div>
+            <div class="mq-badge">발송 / 내부망 전용 연결</div>
+            <ul class="mq-list">
+              <li>비동기 메시지 버퍼링 (RabbitMQ/Kafka)</li>
+              <li>대용량 트래픽 서지 제어 및 백프레셔 통제</li>
+              <li>유실 방지 전용 큐 (Dead Letter Queue)</li>
+              <li>외부 직접 접근 불가 (내부 전용 라우팅)</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Bus Connector SVG -->
+        <div class="bus-connector">
+          <svg width="18" height="70" viewBox="0 0 24 100" fill="none">
+            <path d="M12 5 L12 95" stroke="#94a3b8" stroke-width="2" stroke-dasharray="3 3"/>
+            <polygon points="6,15 12,5 18,15" fill="#3b82f6"/>
+            <polygon points="6,85 12,95 18,85" fill="#3b82f6"/>
+          </svg>
+          <span style="font-size: 8.5px; font-weight: 700; color: #64748b; writing-mode: vertical-rl;">내부버스</span>
+        </div>
+
+        <!-- Subnet 2: Core Processing -->
+        <div class="subnet-core">
+          <div class="subnet-header-core">
+            <span>🔒 AWS Private 네트워크 2망</span>
+          </div>
+          <div class="core-modules">
+            <div class="core-item">
+              <div class="core-item-title">
+                <span style="color:#2563eb;">🎯</span> 타겟팅 엔진 (Targeting)
+              </div>
+              <div class="core-item-desc">수신자 조건 필터링 및 10만 건 CSV 분할 파티셔닝</div>
+            </div>
+
+            <div class="core-item">
+              <div class="core-item-title">
+                <span style="color:#059669;">📝</span> 페이로더 템플릿 엔진 (Payloader)
+              </div>
+              <div class="core-item-desc">개인화 데이터 치환 및 2nd Brain 법령(제50조) 검증</div>
+            </div>
+
+            <div class="core-item">
+              <div class="core-item-title">
+                <span style="color:#7c3aed;">⚙️</span> 보안 비즈니스 로직 (API Engine)
+              </div>
+              <div class="core-item-desc">테넌트별 인증, 충전금 결제 연동 및 작업 파이프라인</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Subnets 3 & 4: Tenant DB Shards -->
+      <div class="bottom-dbs">
+        <div class="db-header">
+          <span>🗄️ AWS Private 3·4망 : 테넌트 격리 자체 데이터 서버</span>
+          <span style="color:#0284c7; font-size:10.5px; font-weight:700;">물리 샤딩 · KMS PBKDF2/AES-256</span>
+        </div>
+        <div class="db-grid">
+          <div class="db-card">
+            <div class="db-icon">🗄️</div>
+            <div class="db-info">
+              <div class="db-name">자체 데이터 서버 1 (네트워크 3망)</div>
+              <div class="db-sub">소상공인 테넌트 기본 DB (초기 단독 운영)</div>
+            </div>
+          </div>
+          <div class="db-card" style="border: 1px dashed #94a3b8; background: #ffffff;">
+            <div class="db-icon" style="background:#f1f5f9; color:#64748b;">➕</div>
+            <div class="db-info">
+              <div class="db-name">자체 데이터 서버 2 (네트워크 4망)</div>
+              <div class="db-sub">엔터프라이즈 고객사용 수평 확장 분리 DB</div>
+            </div>
+          </div>
+        </div>
+        <div class="db-note">
+          💡 <strong>망 구성 원칙:</strong> 고객사별 규모에 따른 자체 데이터 서버 확장을 고려하여 별도 망으로 구성하며, 초기 구성은 1개망으로 진행 후 고객사 유치 시 수평 증설합니다.
+        </div>
+      </div>
+    </div>
+
+    <!-- Column 3: Security Border & External Net -->
+    <div class="col-security">
+      <!-- Security Protocol Box -->
+      <div class="security-gateway">
+        <div class="sec-badge">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2.5">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+          </svg>
+          보안 게이트웨이 (Security Gateway)
+        </div>
+        <ul class="sec-rules">
+          <li><strong>허가된 IP:PORT 통신:</strong> 엄격한 인가 화이트리스트 방화벽 통과</li>
+          <li><strong>상호 인증(mTLS) 보안:</strong> 전송 구간 SSL/TLS 암호화 강제</li>
+          <li><strong>동적 갱신:</strong> 주기적 IP:PORT 연결 방식 및 세션 키 갱신</li>
+        </ul>
+      </div>
+
+      <!-- External Security Zone -->
+      <div class="external-net">
+        <div class="ext-header">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="2" y1="12" x2="22" y2="12"></line>
+            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+          </svg>
+          외부 보안망 (외부연결)
+        </div>
+        <ul class="ext-list">
+          <li class="ext-item">
+            <div class="ext-item-title">📱 금융앱 연계망 (하나원큐 등)</div>
+            <div class="ext-item-desc">인앱 웹뷰(WebView) & SSO 연동</div>
+          </li>
+          <li class="ext-item">
+            <div class="ext-item-title">🔗 엔터프라이즈 B2B 파트너망</div>
+            <div class="ext-item-desc">보안 VPN / REST API 게이트웨이</div>
+          </li>
+          <li class="ext-item">
+            <div class="ext-item-title">💻 사장님 안심 관리자 포털</div>
+            <div class="ext-item-desc">HTTPS 3-Click 모드 & 대시보드</div>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <div class="footer-row">
+      <div>
+        <span>OmniFlow: 소상공인 안심형 마케팅 포털 · 클라우드 메시징 인프라</span>
+        <span>•</span>
+        <span class="source">https://rlaguswls13.github.io/messaging-platform-v1/</span>
+      </div>
+      <div>OmniFlow v1.0 • 중소벤처기업부 모두의 창업 2기</div>
+    </div>
+    <div class="footnote">
+      * 본 아키텍처는 전자금융감독규정 및 개인정보보호법에 따른 망분리·접근통제 요건을 충족하도록 설계되었습니다.
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

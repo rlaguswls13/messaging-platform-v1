@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OmniFlow 영상 제작용 인터랙티브 텔레프롬프터 & 스토리보드</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+  <style>
+    body { font-family: 'Pretendard', sans-serif; }
+    .active-scene {
+      border-color: #2563eb;
+      background: linear-gradient(135deg, rgba(37, 99, 235, 0.08) 0%, rgba(255, 255, 255, 0.95) 100%);
+      box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.15);
+      transform: scale(1.01);
+    }
+  </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen">
+  
+  <!-- Header Bar -->
+  <header class="sticky top-0 z-50 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 px-6 py-4 flex flex-wrap items-center justify-between gap-4">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center font-black text-white text-lg shadow-md shadow-blue-500/30">
+        OF
+      </div>
+      <div>
+        <h1 class="text-base font-bold text-white tracking-tight flex items-center gap-2">
+          OmniFlow 3분 소개 영상 프로덕션 프롬프터
+          <span class="text-xs px-2 py-0.5 rounded-full bg-blue-900/60 text-blue-300 border border-blue-700">하나은행 맞춤형</span>
+        </h1>
+        <p class="text-xs text-slate-400">총 180초 (3분) 피칭 & 시연 큐시트 타임코드 연동</p>
+      </div>
+    </div>
+
+    <!-- Controls -->
+    <div class="flex items-center gap-3">
+      <!-- Time Display -->
+      <div class="px-4 py-2 rounded-xl bg-slate-800 border border-slate-700 flex items-center gap-3 font-mono">
+        <span class="text-xs text-slate-400 font-sans">경과 시간:</span>
+        <span id="timerDisplay" class="text-xl font-black text-emerald-400">00:00</span>
+        <span class="text-xs text-slate-500 font-sans">/ 03:00</span>
+      </div>
+
+      <!-- Play / Pause Button -->
+      <button id="playBtn" onclick="togglePlay()" class="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm flex items-center gap-2 shadow-lg shadow-blue-600/30 transition-all">
+        <span id="playIcon">▶</span>
+        <span id="playText">프롬프터 재생</span>
+      </button>
+
+      <!-- Reset Button -->
+      <button onclick="resetTimer()" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-sm border border-slate-700 transition-colors">
+        ↺ 리셋
+      </button>
+
+      <!-- Speed Control -->
+      <select id="speedSelect" onchange="changeSpeed()" class="bg-slate-800 border border-slate-700 rounded-xl px-2.5 py-2 text-xs text-slate-300 font-medium">
+        <option value="1">1.0x (표준 속도)</option>
+        <option value="1.05" selected>1.05x (추천 호흡)</option>
+        <option value="1.2">1.2x (빠른 연습)</option>
+      </select>
+
+      <a href="index.html" target="_blank" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-blue-400 border border-slate-700 flex items-center gap-1.5">
+        🌐 라이브 쇼케이스 열기 ↗
+      </a>
+    </div>
+  </header>
+
+  <!-- Progress Bar -->
+  <div class="w-full bg-slate-800 h-1.5 sticky top-[73px] z-40">
+    <div id="progressBar" class="h-full bg-gradient-to-r from-blue-500 via-indigo-500 to-emerald-400 transition-all duration-200" style="width: 0%;"></div>
+  </div>
+
+  <!-- Main Content Layout -->
+  <main class="max-w-6xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
+    
+    <!-- Left: Teleprompter Scenes (8 cols) -->
+    <div class="lg:col-span-8 space-y-6" id="scenesContainer">
+      
+      <!-- Scene 1 -->
+      <div id="scene-1" class="scene-card p-6 rounded-2xl bg-slate-800/80 border border-slate-700 transition-all duration-300" data-start="0" data-end="25">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-700/60 mb-4">
+          <div class="flex items-center gap-2.5">
+            <span class="px-2.5 py-1 rounded-lg bg-red-950/60 text-red-400 border border-red-800/60 text-xs font-bold font-mono">
+              00:00 ~ 00:25 (25초)
+            </span>
+            <h2 class="text-base font-bold text-white">Act 1. 문제 제기 : 소상공인의 3대 고통</h2>
+          </div>
+          <button onclick="copyScript(1)" class="text-xs px-2.5 py-1 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-300">
+            대본 복사
+          </button>
+        </div>
+
+        <div class="space-y-3">
+          <div class="text-xs text-amber-400 bg-amber-950/40 border border-amber-800/50 p-3 rounded-xl flex items-start gap-2">
+            <span class="shrink-0 font-bold">🎬 화면 연출:</span>
+            <span>늦은 밤 매장 한숨 B-roll ➔ 정보통신망법 제50조 위반 과태료 3,000만 원 경고 그래픽 ➔ 단순 성공/실패만 노출되는 깜깜이 발송 화면 클로즈업</span>
+          </div>
+
+          <div class="bg-slate-900/90 p-4 rounded-xl border border-slate-800/80 space-y-2">
+            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">🎙️ 나레이션 (TTS):</span>
+            <p id="script-1" class="text-base sm:text-lg leading-relaxed text-slate-200 font-medium">
+              "단골 손님 한 명이라도 더 모으기 위해 보낸 마케팅 문자.<br>
+              하지만 <span class="text-red-400 font-bold">(광고) 표기 하나, 080 수신거부 번호 하나</span> 빠졌다는 이유로 <span class="text-red-400 font-bold">최대 3,000만 원의 과태료</span>를 물 수 있다는 사실, 알고 계셨습니까?<br>
+              게다가 돈 들여 메시지를 보내도 손님이 열어는 봤는지 알 길 없는 답답한 <span class="text-amber-300 font-bold">'깜깜이 발송'</span>까지.<br>
+              소상공인 사장님들에게 고객 마케팅은 늘 불안하고 외로운 숙제였습니다."
+            </p>
+          </div>
+
+          <div class="text-xs text-slate-400 pt-1 flex flex-wrap gap-2 font-mono">
+            <span class="px-2 py-0.5 rounded bg-slate-900 text-slate-400">자막: 과태료 최대 3,000만 원</span>
+            <span class="px-2 py-0.5 rounded bg-slate-900 text-slate-400">자막: 성과 분석 없는 깜깜이 마케팅</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Scene 2 -->
+      <div id="scene-2" class="scene-card p-6 rounded-2xl bg-slate-800/80 border border-slate-700 transition-all duration-300" data-start="25" data-end="50">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-700/60 mb-4">
+          <div class="flex items-center gap-2.5">
+            <span class="px-2.5 py-1 rounded-lg bg-blue-950/60 text-blue-400 border border-blue-800/60 text-xs font-bold font-mono">
+              00:25 ~ 00:50 (25초)
+            </span>
+            <h2 class="text-base font-bold text-white">Act 2. 솔루션 제시 : OmniFlow의 탄생</h2>
+          </div>
+          <button onclick="copyScript(2)" class="text-xs px-2.5 py-1 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-300">
+            대본 복사
+          </button>
+        </div>
+
+        <div class="space-y-3">
+          <div class="text-xs text-blue-400 bg-blue-950/40 border border-blue-800/50 p-3 rounded-xl flex items-start gap-2">
+            <span class="shrink-0 font-bold">🎬 화면 연출:</span>
+            <span>화면이 밝은 파스텔 블루로 반전되며 OmniFlow 3D 로고 모션 ➔ 3-Click 모드 ↔ Pro 모드 Dual-UX 슬로건 타이포 그래픽 ➔ 금융앱 연계 비주얼</span>
+          </div>
+
+          <div class="bg-slate-900/90 p-4 rounded-xl border border-slate-800/80 space-y-2">
+            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">🎙️ 나레이션 (TTS):</span>
+            <p id="script-2" class="text-base sm:text-lg leading-relaxed text-slate-200 font-medium">
+              "이제 소상공인을 위한 가장 완벽한 해답이 시작됩니다.<br>
+              과태료 걱정 없는 <span class="text-blue-400 font-bold">법령 100% 준수 AI 비서</span>와, <span class="text-indigo-300 font-bold">구글 서치콘솔형 실시간 성과 대시보드</span>를 하나로!<br>
+              소상공인과 금융앱을 잇는 상생형 옴니채널 메시징 플랫폼, <span class="text-blue-400 font-bold">OmniFlow(옴니플로우)</span>입니다.<br>
+              단 3번의 클릭으로 복잡한 마케팅 고민을 완전히 끝냅니다."
+            </p>
+          </div>
+
+          <div class="text-xs text-slate-400 pt-1 flex flex-wrap gap-2 font-mono">
+            <span class="px-2 py-0.5 rounded bg-slate-900 text-slate-400">자막: OmniFlow : 상생형 AI 안심 마케팅 포털</span>
+            <span class="px-2 py-0.5 rounded bg-slate-900 text-slate-400">자막: 과태료 리스크 0% + 3-Click 완성</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Scene 3 -->
+      <div id="scene-3" class="scene-card p-6 rounded-2xl bg-slate-800/80 border border-slate-700 transition-all duration-300" data-start="50" data-end="100">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-700/60 mb-4">
+          <div class="flex items-center gap-2.5">
+            <span class="px-2.5 py-1 rounded-lg bg-emerald-950/60 text-emerald-400 border border-emerald-800/60 text-xs font-bold font-mono">
+              00:50 ~ 01:40 (50초)
+            </span>
+            <h2 class="text-base font-bold text-white">Act 3. 라이브 제품 시연 : AI 템플릿 & 대시보드</h2>
+          </div>
+          <button onclick="copyScript(3)" class="text-xs px-2.5 py-1 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-300">
+            대본 복사
+          </button>
+        </div>
+
+        <div class="space-y-3">
+          <div class="text-xs text-emerald-400 bg-emerald-950/40 border border-emerald-800/50 p-3 rounded-xl flex items-start gap-2">
+            <span class="shrink-0 font-bold">🎬 화면 연출:</span>
+            <span>라이브 쇼케이스 직접 녹화 화면: [LiveAiDemo] 배너 클릭 ➔ AI OCR & 키워드 슬롯 채우기 ➔ 우측 스마트폰 (광고) 및 080 번호 완제 줌인 ➔ [DashboardSection] 4대 카드 토글 및 SVG 차트 호버 툴팁 시연</span>
+          </div>
+
+          <div class="bg-slate-900/90 p-4 rounded-xl border border-slate-800/80 space-y-2">
+            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">🎙️ 나레이션 (TTS):</span>
+            <p id="script-3" class="text-base sm:text-lg leading-relaxed text-slate-200 font-medium">
+              "실제 동작 화면을 보시죠.<br>
+              사장님이 매장 포스터나 메뉴 사진 한 장만 업로드하면, AI가 이미지와 키워드를 분석해 <span class="text-emerald-400 font-bold">알림톡·친구톡·문자 템플릿을 3초 만에 완성</span>합니다.<br>
+              2nd Brain 지식 베이스가 정보통신망법 제50조를 자동으로 검증하여, <span class="text-amber-300 font-bold">(광고) 필수 문구와 080 수신거부 번호를 완벽하게 조립</span>합니다.<br>
+              발송 후에는 구글 서치콘솔과 똑같은 대시보드에서 몇 명이 열어보았는지, 몇 명이 쿠폰을 눌렀는지 <span class="text-blue-400 font-bold">실시간으로 추적</span>할 수 있어 다음 번 마케팅 매출을 2배 이상 끌어올릴 수 있습니다."
+            </p>
+          </div>
+
+          <div class="text-xs text-slate-400 pt-1 flex flex-wrap gap-2 font-mono">
+            <span class="px-2 py-0.5 rounded bg-slate-900 text-slate-400">자막: [1단계] 사진 1장 업로드 ➔ 3초 템플릿</span>
+            <span class="px-2 py-0.5 rounded bg-slate-900 text-slate-400">자막: [2단계] (광고)·080 표기 자동 완제</span>
+            <span class="px-2 py-0.5 rounded bg-slate-900 text-slate-400">자막: [3단계] 실시간 오픈율·CTR 성과 대시보드</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Scene 4 -->
+      <div id="scene-4" class="scene-card p-6 rounded-2xl bg-slate-800/80 border border-slate-700 transition-all duration-300" data-start="100" data-end="130">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-700/60 mb-4">
+          <div class="flex items-center gap-2.5">
+            <span class="px-2.5 py-1 rounded-lg bg-indigo-950/60 text-indigo-400 border border-indigo-800/60 text-xs font-bold font-mono">
+              01:40 ~ 02:10 (30초)
+            </span>
+            <h2 class="text-base font-bold text-white">Act 4. 기술력 & 보안 : Netty 초당 2,000건 & KMS 격리</h2>
+          </div>
+          <button onclick="copyScript(4)" class="text-xs px-2.5 py-1 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-300">
+            대본 복사
+          </button>
+        </div>
+
+        <div class="space-y-3">
+          <div class="text-xs text-indigo-400 bg-indigo-950/40 border border-indigo-800/50 p-3 rounded-xl flex items-start gap-2">
+            <span class="shrink-0 font-bold">🎬 화면 연출:</span>
+            <span>AWS 클라우드 인프라 아키텍처 다이어그램 ➔ Netty 소켓 파이프라인(초당 약 2,000건 내부 전처리) ➔ 사업자별 전용 KMS 암호키 분리(AES-256-GCM) 및 테넌트 격리 보안 인포그래픽</span>
+          </div>
+
+          <div class="bg-slate-900/90 p-4 rounded-xl border border-slate-800/80 space-y-2">
+            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">🎙️ 나레이션 (TTS):</span>
+            <p id="script-4" class="text-base sm:text-lg leading-relaxed text-slate-200 font-medium">
+              "OmniFlow는 기초부터 탄탄한 엔지니어링 기술로 설계되었습니다.<br>
+              자체 개발한 Netty 비동기 리액티브 엔진으로 <span class="text-indigo-400 font-bold">초당 약 2,000건의 템플릿 병합과 개인화 전처리</span>를 지연 없이 고속 처리합니다.<br>
+              특히 소상공인의 소중한 단골 고객 개인정보를 지키기 위해 <span class="text-emerald-400 font-bold">사업자별 전용 KMS 암호키 분리와 금융권 수준의 가상 인프라 격리 보안</span>을 적용했습니다.<br>
+              플랫폼 운영자조차 고객 정보를 절대 열람할 수 없는 완벽한 데이터 보안을 보장합니다."
+            </p>
+          </div>
+
+          <div class="text-xs text-slate-400 pt-1 flex flex-wrap gap-2 font-mono">
+            <span class="px-2 py-0.5 rounded bg-slate-900 text-slate-400">자막: Netty 비동기 엔진 초당 약 2,000건 전처리</span>
+            <span class="px-2 py-0.5 rounded bg-slate-900 text-slate-400">자막: 사업자별 독립 KMS 암호키 (AES-256-GCM)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Scene 5 -->
+      <div id="scene-5" class="scene-card p-6 rounded-2xl bg-slate-800/80 border border-slate-700 transition-all duration-300" data-start="130" data-end="160">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-700/60 mb-4">
+          <div class="flex items-center gap-2.5">
+            <span class="px-2.5 py-1 rounded-lg bg-orange-950/60 text-orange-400 border border-orange-800/60 text-xs font-bold font-mono">
+              02:10 ~ 02:40 (30초)
+            </span>
+            <h2 class="text-base font-bold text-white">Act 5. 비즈니스 모델 & 하나은행 상생 시너지</h2>
+          </div>
+          <button onclick="copyScript(5)" class="text-xs px-2.5 py-1 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-300">
+            대본 복사
+          </button>
+        </div>
+
+        <div class="space-y-3">
+          <div class="text-xs text-orange-400 bg-orange-950/40 border border-orange-800/50 p-3 rounded-xl flex items-start gap-2">
+            <span class="shrink-0 font-bold">🎬 화면 연출:</span>
+            <span>하나원큐 모바일 인앱(In-App) 위젯 연동 목업 ➔ 하나원큐 SOHO 상생 플랜(월 0원) ➔ 소상공인(CAC 0원 모객) ⟷ 하나은행(사업자 결제계좌 & 저원가성 예금 유치) 선순환 다이어그램</span>
+          </div>
+
+          <div class="bg-slate-900/90 p-4 rounded-xl border border-slate-800/80 space-y-2">
+            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">🎙️ 나레이션 (TTS):</span>
+            <p id="script-5" class="text-base sm:text-lg leading-relaxed text-slate-200 font-medium">
+              "수익 모델은 금융기관과의 긴밀한 '상생'에 있습니다.<br>
+              하나은행 사업자 계좌를 보유한 소상공인에게는 <span class="text-orange-400 font-bold">'하나원큐 SOHO 상생 플랜'을 통해 월 0원</span>에 AI 안심 템플릿과 기본 발송을 지원합니다.<br>
+              소상공인은 <span class="text-emerald-400 font-bold">고객 획득 비용(CAC) 부담을 덜고</span>,<br>
+              하나은행은 금융앱 체류 시간 확대와 함께 <span class="text-blue-400 font-bold">충전금 자동이체 계좌 유치 및 저원가성 예금 증대 효과</span>를 얻습니다.<br>
+              인프라 원가 기반의 종량 마진과 구독 모델로 지속 가능한 흑자 구조를 입증합니다."
+            </p>
+          </div>
+
+          <div class="text-xs text-slate-400 pt-1 flex flex-wrap gap-2 font-mono">
+            <span class="px-2 py-0.5 rounded bg-slate-900 text-slate-400">자막: 하나원큐 SOHO 상생 플랜 (월 0원)</span>
+            <span class="px-2 py-0.5 rounded bg-slate-900 text-slate-400">자막: [소상공인 CAC 0원] ⟷ [하나은행 결제계좌/예금 유치]</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Scene 6 -->
+      <div id="scene-6" class="scene-card p-6 rounded-2xl bg-slate-800/80 border border-slate-700 transition-all duration-300" data-start="160" data-end="180">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-700/60 mb-4">
+          <div class="flex items-center gap-2.5">
+            <span class="px-2.5 py-1 rounded-lg bg-teal-950/60 text-teal-400 border border-teal-800/60 text-xs font-bold font-mono">
+              02:40 ~ 03:00 (20초)
+            </span>
+            <h2 class="text-base font-bold text-white">Act 6. 사업화 로드맵 & 엔딩 비전</h2>
+          </div>
+          <button onclick="copyScript(6)" class="text-xs px-2.5 py-1 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-300">
+            대본 복사
+          </button>
+        </div>
+
+        <div class="space-y-3">
+          <div class="text-xs text-teal-400 bg-teal-950/40 border border-teal-800/50 p-3 rounded-xl flex items-start gap-2">
+            <span class="shrink-0 font-bold">🎬 화면 연출:</span>
+            <span>3단계 로드맵 인포그래픽(1단계 클라우드 알파 ➔ 2단계 소상공인 현장 베타 ➔ 3단계 하나원큐 정식 연동) ➔ 공식 쇼케이스 URL 및 QR코드 ➔ 엔딩 브랜드 슬로건</span>
+          </div>
+
+          <div class="bg-slate-900/90 p-4 rounded-xl border border-slate-800/80 space-y-2">
+            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">🎙️ 나레이션 (TTS):</span>
+            <p id="script-6" class="text-base sm:text-lg leading-relaxed text-slate-200 font-medium">
+              "OmniFlow는 프로토타입 검증을 마쳤으며,<br>
+              1단계 클라우드 알파부터 2단계 현장 베타, 그리고 <span class="text-teal-300 font-bold">하나은행 인앱 정식 연동</span>까지 단계별 실행 준비를 모두 마쳤습니다.<br>
+              소상공인의 든든한 마케팅 비서이자 하나은행의 상생 파트너,<br>
+              <span class="text-blue-400 font-bold">OmniFlow</span>가 골목상권의 새로운 미래를 열겠습니다. 감사합니다."
+            </p>
+          </div>
+
+          <div class="text-xs text-slate-400 pt-1 flex flex-wrap gap-2 font-mono">
+            <span class="px-2 py-0.5 rounded bg-slate-900 text-slate-400">자막: 1단계 알파 ➔ 2단계 현장 베타 ➔ 3단계 하나원큐 연동</span>
+            <span class="px-2 py-0.5 rounded bg-slate-900 text-slate-400">자막: 라이브 체험: rlaguswls13.github.io/messaging-platform-v1</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Right: Visual Reference & Recording Checklist (4 cols) -->
+    <div class="lg:col-span-4 space-y-6">
+      
+      <!-- Quick Info Card -->
+      <div class="bg-slate-800/90 rounded-2xl p-5 border border-slate-700 space-y-4">
+        <h3 class="text-sm font-bold text-white flex items-center gap-2">
+          <span>🎯</span> 비디오 스펙 요약
+        </h3>
+        <dl class="text-xs space-y-2 text-slate-300">
+          <div class="flex justify-between border-b border-slate-700/50 pb-1.5">
+            <dt class="text-slate-400">총 러닝타임:</dt>
+            <dd class="font-bold text-emerald-400">180초 (3분 00초)</dd>
+          </div>
+          <div class="flex justify-between border-b border-slate-700/50 pb-1.5">
+            <dt class="text-slate-400">해상도 / FPS:</dt>
+            <dd class="font-medium text-slate-200">1920x1080 (16:9) / 60fps</dd>
+          </div>
+          <div class="flex justify-between border-b border-slate-700/50 pb-1.5">
+            <dt class="text-slate-400">전체 음절 수:</dt>
+            <dd class="font-medium text-slate-200">약 950음절 (316음절/분)</dd>
+          </div>
+          <div class="flex justify-between border-b border-slate-700/50 pb-1.5">
+            <dt class="text-slate-400">타깃 심사:</dt>
+            <dd class="font-medium text-blue-300">하나은행 맞춤형 공모</dd>
+          </div>
+          <div class="flex justify-between">
+            <dt class="text-slate-400">BGM 권장 BPM:</dt>
+            <dd class="font-medium text-slate-200">118 ~ 124 BPM</dd>
+          </div>
+        </dl>
+      </div>
+
+      <!-- Image Assets Preview Links -->
+      <div class="bg-slate-800/90 rounded-2xl p-5 border border-slate-700 space-y-3">
+        <h3 class="text-sm font-bold text-white flex items-center gap-2">
+          <span>🖼️</span> 사용 다이어그램 에셋
+        </h3>
+        <ul class="text-xs space-y-2 text-blue-400 font-medium">
+          <li>
+            <a href="aws_messaging_infra.jpg" target="_blank" class="hover:underline flex items-center justify-between p-2 rounded-lg bg-slate-900/60 border border-slate-700/60">
+              <span>AWS 메시징 인프라 아키텍처</span>
+              <span class="text-slate-500">Act 4 ↗</span>
+            </a>
+          </li>
+          <li>
+            <a href="business_roadmap_3stage.jpg" target="_blank" class="hover:underline flex items-center justify-between p-2 rounded-lg bg-slate-900/60 border border-slate-700/60">
+              <span>3단계 사업화 로드맵 인포그래픽</span>
+              <span class="text-slate-500">Act 6 ↗</span>
+            </a>
+          </li>
+          <li>
+            <a href="omniflow_comparison_table.png" target="_blank" class="hover:underline flex items-center justify-between p-2 rounded-lg bg-slate-900/60 border border-slate-700/60">
+              <span>기존 솔루션 대비 차별점 비교표</span>
+              <span class="text-slate-500">자료 ↗</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Recording Steps Checklist -->
+      <div class="bg-slate-800/90 rounded-2xl p-5 border border-slate-700 space-y-3">
+        <h3 class="text-sm font-bold text-white flex items-center gap-2">
+          <span>✅</span> 녹화 및 편집 체크리스트
+        </h3>
+        <ul class="text-xs space-y-2 text-slate-300">
+          <li class="flex items-center gap-2">
+            <input type="checkbox" id="chk1" class="rounded bg-slate-900 border-slate-700 text-blue-600">
+            <label for="chk1">ElevenLabs / Vrew로 6개 씬 나레이션 생성</label>
+          </li>
+          <li class="flex items-center gap-2">
+            <input type="checkbox" id="chk2" class="rounded bg-slate-900 border-slate-700 text-blue-600">
+            <label for="chk2">쇼케이스 화면 녹화 (Live AI Demo 배너 클릭)</label>
+          </li>
+          <li class="flex items-center gap-2">
+            <input type="checkbox" id="chk3" class="rounded bg-slate-900 border-slate-700 text-blue-600">
+            <label for="chk3">쇼케이스 화면 녹화 (대시보드 메트릭 토글 & 호버)</label>
+          </li>
+          <li class="flex items-center gap-2">
+            <input type="checkbox" id="chk4" class="rounded bg-slate-900 border-slate-700 text-blue-600">
+            <label for="chk4">아키텍처 및 로드맵 이미지 컷 배치</label>
+          </li>
+          <li class="flex items-center gap-2">
+            <input type="checkbox" id="chk5" class="rounded bg-slate-900 border-slate-700 text-blue-600">
+            <label for="chk5">배경음악 덕킹(-20dB) 및 효과음 삽입</label>
+          </li>
+          <li class="flex items-center gap-2">
+            <input type="checkbox" id="chk6" class="rounded bg-slate-900 border-slate-700 text-blue-600">
+            <label for="chk6">최종 1080p 60fps MP4 렌더링 완료</label>
+          </li>
+        </ul>
+      </div>
+
+    </div>
+
+  </main>
+
+  <script>
+    let timer = 0;
+    let isPlaying = false;
+    let interval = null;
+    let playbackRate = 1.05;
+
+    function formatTime(sec) {
+      const m = Math.floor(sec / 60);
+      const s = Math.floor(sec % 60);
+      return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    }
+
+    function togglePlay() {
+      if (isPlaying) {
+        pauseTimer();
+      } else {
+        startTimer();
+      }
+    }
+
+    function startTimer() {
+      if (timer >= 180) timer = 0;
+      isPlaying = true;
+      document.getElementById('playIcon').textContent = '⏸';
+      document.getElementById('playText').textContent = '일시 정지';
+      document.getElementById('playBtn').classList.replace('bg-blue-600', 'bg-amber-600');
+      document.getElementById('playBtn').classList.replace('hover:bg-blue-500', 'hover:bg-amber-500');
+
+      const stepMs = 100;
+      interval = setInterval(() => {
+        timer += (stepMs / 1000) * playbackRate;
+        if (timer >= 180) {
+          timer = 180;
+          pauseTimer();
+        }
+        updateUI();
+      }, stepMs);
+    }
+
+    function pauseTimer() {
+      isPlaying = false;
+      clearInterval(interval);
+      document.getElementById('playIcon').textContent = '▶';
+      document.getElementById('playText').textContent = '프롬프터 재생';
+      document.getElementById('playBtn').classList.replace('bg-amber-600', 'bg-blue-600');
+      document.getElementById('playBtn').classList.replace('hover:bg-amber-500', 'hover:bg-blue-500');
+    }
+
+    function resetTimer() {
+      pauseTimer();
+      timer = 0;
+      updateUI();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function changeSpeed() {
+      playbackRate = parseFloat(document.getElementById('speedSelect').value);
+    }
+
+    function updateUI() {
+      document.getElementById('timerDisplay').textContent = formatTime(timer);
+      const progressPercent = Math.min(100, (timer / 180) * 100);
+      document.getElementById('progressBar').style.width = progressPercent + '%';
+
+      // Update active scene
+      const scenes = document.querySelectorAll('.scene-card');
+      scenes.forEach((card) => {
+        const start = parseFloat(card.getAttribute('data-start'));
+        const end = parseFloat(card.getAttribute('data-end'));
+
+        if (timer >= start && timer < end) {
+          if (!card.classList.contains('active-scene')) {
+            card.classList.add('active-scene');
+            card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        } else {
+          card.classList.remove('active-scene');
+        }
+      });
+    }
+
+    function copyScript(sceneNumber) {
+      const text = document.getElementById(`script-${sceneNumber}`).innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        alert(`Act ${sceneNumber} 대본이 클립보드에 복사되었습니다. (ElevenLabs 또는 Vrew에 붙여넣기하세요)`);
+      });
+    }
+  </script>
+</body>
+</html>
