@@ -5,6 +5,7 @@ import { DashboardSection } from './components/DashboardSection';
 import { PhasedRoadmap } from './components/PhasedRoadmap';
 import { LiveAiDemo } from './components/LiveAiDemo';
 import { DualUxSection } from './components/DualUxSection';
+import { ComparisonTableSection } from './components/ComparisonTableSection';
 import { SecuritySection } from './components/SecuritySection';
 import { BenchmarkSection } from './components/BenchmarkSection';
 import { PricingSection } from './components/PricingSection';
@@ -22,13 +23,14 @@ export const App: React.FC = () => {
       {/* Top Fixed Header */}
       <Navbar />
 
-      {/* Main Sections (What to do 4대 핵심 축) */}
+      {/* Main Sections (What to do 4대 핵심 축 + 기술 비교) */}
       <main className="flex-grow">
         <HeroSection />
         <DashboardSection />
         <PhasedRoadmap />
         <LiveAiDemo />
         <DualUxSection />
+        <ComparisonTableSection />
         <SecuritySection />
         <BenchmarkSection />
         <PricingSection />

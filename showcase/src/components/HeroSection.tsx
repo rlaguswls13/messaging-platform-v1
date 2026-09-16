@@ -31,8 +31,8 @@ export const HeroSection: React.FC = () => {
 
           {/* Sub Headline */}
           <p className="text-base sm:text-lg lg:text-xl text-slate-600 max-w-3xl mx-auto font-normal leading-relaxed">
-            시시각각 바뀌는 법령 규제(과태료 3,000만 원)의 공포는 <strong className="text-slate-900 font-bold">2nd Brain 규제 린터</strong>로 원천 차단하고,
-            금융권 수준의 <strong className="text-slate-900 font-bold">테넌트 KMS 가상 인프라 격리</strong>로 엔터프라이즈의 보안 불신을 완벽히 해결했습니다.
+            1인 셀러의 <strong className="text-slate-900 font-bold">마케팅 성과 분석 부재</strong>와 <strong className="text-slate-900 font-bold">법령 규제 불안</strong>은 구글 서치콘솔형 대시보드와 2nd Brain AI로 해결하고,
+            기업의 <strong className="text-slate-900 font-bold">온프레미스 고착화</strong>는 테넌트 KMS 가상 인프라 격리 클라우드 구독제로 완벽히 대체합니다.
           </p>
 
           {/* Action CTAs */}
