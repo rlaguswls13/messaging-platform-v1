@@ -66,7 +66,7 @@ async function assemble() {
   // 3. Render complete video in a SINGLE unified pass (avoids any timestamp desync or Part 3 - Part 4 cutoff!)
   console.log('Rendering unified full video with FFmpeg...');
   const finalOutPath = path.join(DOCS_DIR, 'omniflow_intro_presentation.mp4');
-  run(`ffmpeg -y -f concat -safe 0 -i "${imageTimelineFile}" -i "${masterAudioPath}" -c:v libx264 -tune stillimage -pix_fmt yuv420p -r 25 -c:a aac -b:a 192k -shortest -movflags +faststart "${finalOutPath}"`);
+  run(`ffmpeg -y -f concat -safe 0 -i "${imageTimelineFile}" -i "${masterAudioPath}" -c:v libx264 -tune stillimage -pix_fmt yuv420p -r 25 -c:a aac -b:a 192k -t ${totalAudioDuration} -movflags +faststart "${finalOutPath}"`);
 
   // Copy to showcase public
   const showcasePublicOut = path.join(SHOWCASE_PUBLIC_DIR, 'omniflow_intro_presentation.mp4');

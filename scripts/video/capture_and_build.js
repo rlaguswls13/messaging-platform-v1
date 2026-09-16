@@ -1,8 +1,8 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
-const { execSync } = require('child_process');
-const puppeteer = require('./node_modules/puppeteer-core');
+const BUILD_DIR = path.join(__dirname, '..', '..', '.video_build');
+const puppeteer = require(path.join(BUILD_DIR, 'node_modules', 'puppeteer-core'));
 
 const mimeTypes = {
   '.html': 'text/html',
@@ -19,7 +19,7 @@ const server = http.createServer((req, res) => {
   if (reqPath.startsWith('/slides')) {
     filePath = path.join(__dirname, 'slides_template.html');
   } else {
-    filePath = path.join(__dirname, '..', 'docs', reqPath === '/' ? 'index.html' : reqPath);
+    filePath = path.join(__dirname, '..', '..', 'docs', reqPath === '/' ? 'index.html' : reqPath);
   }
   const ext = path.extname(filePath);
   fs.readFile(filePath, (err, content) => {
@@ -47,14 +47,14 @@ async function main() {
   await page.setViewport({ width: 1920, height: 1080, deviceScaleFactor: 1 });
 
   // 1. Capture dedicated slides
-  console.log('Capturing custom slides...');
+  console.log('Capturing custom slides to .video_build...');
   await page.goto('http://localhost:4567/slides', { waitUntil: 'networkidle0' });
 
   for (const num of [1, 2, 4, 5, 6]) {
     const el = await page.$(`#slide-${num}`);
     if (el) {
-      await el.screenshot({ path: path.join(__dirname, `slide_${num}.png`) });
-      console.log(`Captured slide_${num}.png`);
+      await el.screenshot({ path: path.join(BUILD_DIR, `slide_${num}.png`) });
+      console.log(`Captured slide_${num}.png to ${BUILD_DIR}`);
     }
   }
 
