@@ -46,7 +46,7 @@ export const LiveAiDemo: React.FC = () => {
             <span className="gradient-text font-black">2nd Brain Context 정제</span> & 광고/정보성 법령 구분
           </h2>
           <p className="text-slate-600 text-base sm:text-lg">
-            이미지 1장과 키워드로 채널별 최적 규격 배너를 3초 만에 생성합니다. 국내 정보통신망법 제50조(광고/정보성 구분, 080 수신거부)를 완전 자동 검증하며, 자체 2nd Brain 지식 베이스의 Context 슬라이싱으로 AI 토큰 비용을 82% 이상 절감합니다.
+            이미지 1장과 키워드로 채널별 최적 규격 배너를 3초 만에 생성합니다. 국내 정보통신망법 제50조(광고/정보성 구분, 080 수신거부)를 완전 자동 검증합니다.
           </p>
         </div>
 
