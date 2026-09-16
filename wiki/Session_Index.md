@@ -3,6 +3,7 @@
 이 문서는 날짜별 세션 원본 아카이브(`sessions/raw/`)의 인덱스입니다. 큐레이션된 최신 작업 상태는 `.agent/session-handoff.md`를 참고하세요.
 
 ## 날짜별 세션 아카이브
+- [2026-09-17](sessions/raw/2026-09-17.md)
 - [2026-09-16](sessions/raw/2026-09-16.md)
 - [2026-09-15](sessions/raw/2026-09-15.md)
 - [2026-09-14](sessions/raw/2026-09-14.md)
