@@ -16,11 +16,11 @@ export const ComparisonTableSection: React.FC = () => {
         <div className="text-center max-w-3xl mx-auto space-y-4 mb-14">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-pastel-blue-50 border border-pastel-blue-200 text-pastel-blue-700 text-xs font-bold shadow-sm">
             <Layers className="w-3.5 h-3.5 text-pastel-blue-600" />
-            <span>기술 혁신성 및 차별화 비교</span>
+            <span>기술 발전성 및 차별화 비교</span>
           </div>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 tracking-tight">
             기존 B2C 툴과 B2B 솔루션의 한계를<br />
-            <span className="gradient-text font-black">엔지니어링으로 혁신</span>했습니다
+            <span className="gradient-text font-black">엔지니어링으로 발전</span>했습니다
           </h2>
           <p className="text-slate-600 text-base sm:text-lg">
             단순 발송 웹 폼에 머무르는 B2C 도구의 분석력 부재와 수억 원대 온프레미스 레거시의 기술 고착화를 극복하고,

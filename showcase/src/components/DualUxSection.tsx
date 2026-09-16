@@ -21,7 +21,7 @@ export const DualUxSection: React.FC = () => {
             <span className="text-pastel-blue-600">사내 DB 직접 쿼리</span>와 <span className="text-pastel-orange-500">테넌트 암호화 Pro Mode</span>까지
           </h2>
           <p className="text-slate-600 text-base sm:text-lg">
-            1인 셀러·소상공인은 복잡한 개발 없이 노코드 3-Click으로 1분 만에 대량 발송하고, 기업 및 전문 엔지니어는 사내망 DB 직접 쿼리와 PBKDF2/AES-256 테넌트 전용 암호화 체계로 대량 데이터를 내부적으로 안전하게 전처리·제어합니다.
+            1인 셀러·소상공인은 복잡한 개발 없이 노코드 3-Step으로 1분 만에 대량 발송하고, 기업 및 전문 엔지니어는 사내망 DB 직접 쿼리와 PBKDF2/AES-256 테넌트 전용 암호화 체계로 대량 데이터를 내부적으로 안전하게 전처리·제어합니다.
           </p>
 
           {/* Toggle Switch */}
@@ -62,8 +62,8 @@ export const DualUxSection: React.FC = () => {
               <div className="flex items-center justify-between border-b border-slate-100 pb-6">
                 <div>
                   <h3 className="text-2xl font-bold text-slate-900 flex items-center gap-2.5">
-                    <span className="w-8 h-8 rounded-lg bg-pastel-blue-100 text-pastel-blue-700 flex items-center justify-center text-sm font-black">
-                      3-Click
+                    <span className="h-8 px-2.5 rounded-lg bg-pastel-blue-100 text-pastel-blue-700 inline-flex items-center justify-center text-xs font-black whitespace-nowrap shrink-0">
+                      3-Step
                     </span>
                     초간편 원스톱 발송 파이프라인
                   </h3>
