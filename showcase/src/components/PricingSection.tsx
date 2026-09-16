@@ -281,7 +281,7 @@ export const PricingSection: React.FC = () => {
                 </div>
                 <div className="flex items-center gap-2">
                   <Check className="w-4 h-4 text-pastel-blue-600 shrink-0" />
-                  <span>속도 50 TPS & 로그 90일 보관 (템플릿 30개)</span>
+                  <span>내부 전처리 속도 50 TPS & 로그 90일 보관 (템플릿 30개)</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Check className="w-4 h-4 text-pastel-blue-600 shrink-0" />
@@ -365,7 +365,7 @@ export const PricingSection: React.FC = () => {
                 </div>
                 <div className="flex items-center gap-2">
                   <Check className="w-4 h-4 text-pastel-orange-600 shrink-0" />
-                  <span>부서별 발송 예산 잠금 & 1,000 TPS 우선 큐</span>
+                  <span>부서별 발송 예산 잠금 & 내부 전처리 1,000 TPS 우선 큐</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Check className="w-4 h-4 text-pastel-orange-600 shrink-0" />
@@ -435,7 +435,7 @@ export const PricingSection: React.FC = () => {
                 </div>
                 <div className="flex items-center gap-2">
                   <Check className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <span>초당 5.4만 건 독점 엔진 & SLA 99.9%</span>
+                  <span>내부 전처리 초당 2,000건 독점 엔진 & SLA 99.9%</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Check className="w-4 h-4 text-emerald-600 shrink-0" />
@@ -826,7 +826,7 @@ export const PricingSection: React.FC = () => {
                       자체 이메일 (SMTP)
                     </td>
                     <td className="py-3 px-4 text-pastel-blue-700 font-black">1.5원</td>
-                    <td className="py-3 px-4 text-slate-600">Netty TCP Port 25 리액티브 엔진 (초당 5.4만 건)</td>
+                    <td className="py-3 px-4 text-slate-600">Netty TCP Port 25 리액티브 엔진 (내부 전처리 초당 2,000건)</td>
                     <td className="py-3 px-4 text-emerald-600 font-bold">080 무료수신거부 자동 인젝션</td>
                     <td className="py-3 px-4 text-slate-400">-</td>
                   </tr>

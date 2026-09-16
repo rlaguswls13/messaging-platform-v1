@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { UserCheck, Terminal, UploadCloud, Sparkles, Send, Database, ShieldAlert, Cpu, Layers } from 'lucide-react';
+import { useWhitelabel } from '../context/WhitelabelContext';
 
 export const DualUxSection: React.FC = () => {
+  const whitelabel = useWhitelabel();
   const [activeTab, setActiveTab] = useState<'lite' | 'pro'>('lite');
 
   return (
@@ -19,7 +21,7 @@ export const DualUxSection: React.FC = () => {
             <span className="text-pastel-blue-600">사내 DB 직접 쿼리</span>와 <span className="text-pastel-orange-500">테넌트 암호화 Pro Mode</span>까지
           </h2>
           <p className="text-slate-600 text-base sm:text-lg">
-            1인 셀러·소상공인은 복잡한 개발 없이 노코드 3-Click으로 1분 만에 대량 발송하고, 기업 및 전문 엔지니어는 사내망 DB 직접 쿼리와 PBKDF2/AES-256 테넌트 전용 암호화 체계로 초당 수만 건을 안전하게 제어합니다.
+            1인 셀러·소상공인은 복잡한 개발 없이 노코드 3-Click으로 1분 만에 대량 발송하고, 기업 및 전문 엔지니어는 사내망 DB 직접 쿼리와 PBKDF2/AES-256 테넌트 전용 암호화 체계로 대량 데이터를 내부적으로 안전하게 전처리·제어합니다.
           </p>
 
           {/* Toggle Switch */}
@@ -68,9 +70,10 @@ export const DualUxSection: React.FC = () => {
                   <p className="text-sm text-slate-500 mt-1">엑셀 복사-붙여넣기부터 발송까지 소요 시간 단 1분 미만</p>
                 </div>
                 <span className="hidden sm:inline-flex px-3 py-1 rounded-full bg-pastel-blue-50 text-pastel-blue-700 text-xs font-bold border border-pastel-blue-200">
-                  개발자 연동 불필요
+                  {whitelabel.sendModeLabel}
                 </span>
               </div>
+              <p className="text-xs text-slate-500">{whitelabel.sendModeDescription}</p>
 
               {/* 3 Step Cards */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -168,7 +171,7 @@ export const DualUxSection: React.FC = () => {
                     <Cpu className="w-4 h-4 text-pastel-blue-600" />
                     Netty 논블로킹 엔진
                   </div>
-                  <p className="text-xs text-slate-600">Netty TCP 소켓 기반으로 초당 5.4만 건의 대량 트래픽을 지연 없이 소화</p>
+                  <p className="text-xs text-slate-600">Netty TCP 소켓 기반으로 초당 약 2,000건의 내부 데이터 전처리를 지연 없이 소화 (최종 발송 속도는 외부 채널 서버 상태에 따라 별도)</p>
                 </div>
 
                 <div className="p-4 rounded-xl bg-slate-50 border border-slate-200">

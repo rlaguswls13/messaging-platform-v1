@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Shield, Zap, Sparkles, Menu, X, ArrowRight, Server } from 'lucide-react';
+import { useWhitelabel } from '../context/WhitelabelContext';
 
 export const Navbar: React.FC = () => {
+  const whitelabel = useWhitelabel();
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -25,19 +27,19 @@ export const Navbar: React.FC = () => {
         <div className="flex items-center justify-between">
           {/* Logo */}
           <a href="#" className="flex items-center gap-2.5 group">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-pastel-blue-600 via-sky-500 to-pastel-orange-500 p-0.5 shadow-md shadow-pastel-blue-500/20 group-hover:scale-105 transition-transform">
+            <div className={`w-10 h-10 rounded-xl bg-gradient-to-tr ${whitelabel.logoGradientClass} p-0.5 shadow-md shadow-pastel-blue-500/20 group-hover:scale-105 transition-transform`}>
               <div className="w-full h-full bg-white rounded-[10px] flex items-center justify-center">
                 <Zap className="w-5 h-5 text-pastel-blue-600 group-hover:text-pastel-orange-500 transition-colors" />
               </div>
             </div>
             <div className="flex flex-col">
               <span className="text-xl font-black tracking-tight text-slate-900 flex items-center gap-1.5">
-                OmniFlow
+                {whitelabel.brandName}
                 <span className="text-[10px] uppercase font-bold tracking-widest px-2 py-0.5 rounded-full bg-pastel-blue-100 text-pastel-blue-700 border border-pastel-blue-200">
                   v1.0
                 </span>
               </span>
-              <span className="text-[10px] text-slate-500 tracking-wider">차세대 옴니채널 메시징 SaaS</span>
+              <span className="text-[10px] text-slate-500 tracking-wider">{whitelabel.brandTagline}</span>
             </div>
           </a>
 

@@ -1,7 +1,9 @@
 import React from 'react';
 import { ArrowRight, ShieldCheck, Sparkles, Activity, CheckCircle2, Zap } from 'lucide-react';
+import { useWhitelabel } from '../context/WhitelabelContext';
 
 export const HeroSection: React.FC = () => {
+  const whitelabel = useWhitelabel();
   return (
     <section className="relative pt-28 pb-16 md:pt-36 md:pb-24 overflow-hidden">
       {/* Background Soft Pastel Glows */}
@@ -17,7 +19,7 @@ export const HeroSection: React.FC = () => {
               <span className="relative inline-flex rounded-full h-2 w-2 bg-pastel-orange-500"></span>
             </span>
             <span className="text-xs font-bold text-slate-700">
-              중소벤처기업부 「모두의 창업 2기」 출품작
+              {whitelabel.applicationBadge}
             </span>
             <span className="text-slate-300">|</span>
             <span className="text-xs text-pastel-blue-700 font-bold">초가성비 옴니채널 메시징 SaaS</span>
@@ -25,7 +27,7 @@ export const HeroSection: React.FC = () => {
 
           {/* Main Headline */}
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-900 leading-[1.18]">
-            보안은 <span className="text-pastel-blue-600 font-black">온프레미스급</span>, 속도는 <span className="text-pastel-orange-500 font-black">초당 5만 건</span>,<br />
+            보안은 <span className="text-pastel-blue-600 font-black">온프레미스급</span>, 내부 처리는 <span className="text-pastel-orange-500 font-black">초당 2,000건</span>,<br />
             템플릿은 <span className="gradient-text font-black">AI 2nd Brain</span>으로 3초 만에.
           </h1>
 
@@ -42,7 +44,7 @@ export const HeroSection: React.FC = () => {
               className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-8 py-4 rounded-xl text-base font-bold text-white bg-gradient-to-r from-pastel-blue-600 via-sky-600 to-pastel-orange-500 hover:from-pastel-blue-700 hover:to-pastel-orange-600 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 shadow-xl shadow-pastel-blue-500/20 group"
             >
               <Sparkles className="w-5 h-5 text-pastel-orange-200 group-hover:rotate-12 transition-transform" />
-              <span>이미지 1장으로 AI 템플릿 즉시 체험</span>
+              <span>{whitelabel.heroCtaPrimary}</span>
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </a>
             <a
@@ -50,7 +52,7 @@ export const HeroSection: React.FC = () => {
               className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-4 rounded-xl text-base font-bold text-slate-700 bg-white hover:bg-pastel-blue-50/60 border border-slate-200 hover:border-pastel-blue-300 transition-all shadow-sm hover:shadow"
             >
               <ShieldCheck className="w-5 h-5 text-pastel-orange-500" />
-              <span>채널·인원별 요금표 확인하기</span>
+              <span>{whitelabel.heroCtaSecondary}</span>
             </a>
           </div>
 
@@ -62,9 +64,9 @@ export const HeroSection: React.FC = () => {
               </div>
               <div>
                 <div className="text-xl font-black text-slate-900 tracking-tight flex items-baseline gap-1">
-                  54,347 <span className="text-xs text-pastel-blue-600 font-bold">TPS</span>
+                  2,000 <span className="text-xs text-pastel-blue-600 font-bold">TPS (내부 전처리)</span>
                 </div>
-                <div className="text-xs text-slate-500 font-medium">10만 건 1.84초 파티셔닝 실측</div>
+                <div className="text-xs text-slate-500 font-medium">10만 건 약 50초 파티셔닝 실측 · 발송 속도는 별도</div>
               </div>
             </div>
 
@@ -108,7 +110,7 @@ export const HeroSection: React.FC = () => {
               {/* Floating Stat Badge */}
               <div className="absolute -bottom-4 right-6 hidden sm:flex items-center gap-2.5 px-4 py-2.5 rounded-2xl bg-white/95 backdrop-blur-md border border-pastel-orange-200 shadow-lg text-slate-800 text-xs font-bold">
                 <span className="w-2.5 h-2.5 rounded-full bg-pastel-orange-500 animate-ping"></span>
-                <span>실시간 분산 엔진 가동 중: <strong className="text-pastel-blue-600 font-black">54,347 TPS</strong></span>
+                <span>내부 데이터 전처리 엔진 가동 중: <strong className="text-pastel-blue-600 font-black">2,000 TPS</strong></span>
               </div>
             </div>
           </div>

@@ -4,10 +4,12 @@ import { Activity, Gauge, Check, Clock, TrendingUp, Cpu } from 'lucide-react';
 export const BenchmarkSection: React.FC = () => {
   const [targetCount, setTargetCount] = useState<number>(100000);
 
-  // 54,347 TPS based calculation
-  const tps = 54347;
+  // 내부 데이터 전처리(템플릿 병합·개인화 데이터 주입) 파이프라인 실측치. 실제 최종 발송 속도가 아님.
+  const tps = 2000;
+  const legacyTps = 150;
   const elapsedSec = (targetCount / tps).toFixed(2);
-  const legacyElapsedSec = (targetCount / 3000).toFixed(1);
+  const legacyElapsedSec = (targetCount / legacyTps).toFixed(1);
+  const speedupRatio = Math.round(tps / legacyTps);
 
   return (
     <section id="performance" className="py-20 md:py-28 bg-slate-50/80 border-t border-slate-200 relative overflow-hidden">
@@ -24,11 +26,12 @@ export const BenchmarkSection: React.FC = () => {
           </div>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 tracking-tight">
             말로만 하는 대용량이 아닙니다.<br />
-            10만 건을 <span className="text-pastel-blue-600">1.84초</span> 만에 파티셔닝합니다.
+            10만 건 데이터를 <span className="text-pastel-blue-600">약 50초</span> 만에 전처리·파티셔닝합니다.
           </h2>
           <p className="text-slate-600 text-base sm:text-lg">
             Netty 기반 리액티브 논블로킹 엔진과 물리 파티셔닝 스트리밍 기술로
-            초당 54,347건을 처리하여, 서버 과부하나 메시지 지연을 원천 차단했습니다.
+            템플릿 병합·개인화 데이터 주입 등 발송 전(前) 내부 처리 단계에서 초당 약 2,000건을 처리합니다.
+            (실제 최종 발송 속도는 카카오 알림톡·통신사 SMS 게이트웨이·이메일 릴레이 등 외부 채널 서버 상태에 따라 달라지는 별도 변수입니다.)
           </p>
         </div>
 
@@ -74,7 +77,7 @@ export const BenchmarkSection: React.FC = () => {
                   <Cpu className="w-3 h-3" />
                   OmniFlow v1
                 </span>
-                <span className="text-xs text-pastel-blue-700 font-black">초당 54,347 TPS</span>
+                <span className="text-xs text-pastel-blue-700 font-black">초당 약 2,000건 (내부 전처리)</span>
               </div>
 
               <div>
@@ -102,7 +105,7 @@ export const BenchmarkSection: React.FC = () => {
                 <span className="text-xs font-semibold px-2.5 py-1 rounded bg-slate-200 text-slate-600">
                   시중 B2B 레거시 솔루션
                 </span>
-                <span className="text-xs text-slate-500">초당 약 3,000건</span>
+                <span className="text-xs text-slate-500">초당 약 150건</span>
               </div>
 
               <div>
@@ -119,7 +122,7 @@ export const BenchmarkSection: React.FC = () => {
                 </div>
                 <div className="flex items-center gap-2">
                   <TrendingUp className="w-4 h-4" />
-                  <span>OmniFlow 대비 약 18배 느림</span>
+                  <span>OmniFlow 대비 약 {speedupRatio}배 느림</span>
                 </div>
               </div>
             </div>
@@ -130,12 +133,16 @@ export const BenchmarkSection: React.FC = () => {
           <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-600 flex flex-col sm:flex-row items-center justify-between gap-3">
             <span className="flex items-center gap-2 font-medium">
               <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-              공식 10만 건 벤치마크 테스트 완료 (2026-09-03 실측 로그 기록 기준)
+              공식 10만 건 내부 전처리 벤치마크 테스트 완료 (2026-09-03 실측 로그 기록 기준)
             </span>
             <span className="font-mono text-slate-500 text-[11px]">
               Module: messaging-targeting + messaging-payloader
             </span>
           </div>
+          <p className="text-[11px] text-slate-400 text-center px-2">
+            ※ 위 수치는 발송 전(前) 템플릿 병합·개인화 데이터 주입·CSV 파티셔닝 등 내부 데이터 처리 단계의 실측치이며, 실제 최종 메시지 발송(디스패치) 속도가 아닙니다.
+            발송 속도는 카카오 알림톡·통신사 SMS 게이트웨이·이메일 릴레이 등 당사가 통제할 수 없는 외부 채널 서버의 용량 및 상태에 따라 달라집니다.
+          </p>
 
         </div>
 

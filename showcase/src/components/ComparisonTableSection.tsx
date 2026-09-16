@@ -87,10 +87,10 @@ export const ComparisonTableSection: React.FC = () => {
             <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-1.5">
               <div className="flex items-center gap-2 text-xs font-bold text-slate-900">
                 <Cpu className="w-4 h-4 text-pastel-blue-600" />
-                <span>실측 54,347 TPS 고속 파이프라인</span>
+                <span>실측 2,000 TPS 내부 전처리 파이프라인</span>
               </div>
               <p className="text-[11px] text-slate-600 leading-relaxed">
-                10만 건 CSV 물리 파티셔닝 1.84초 실측 기록 및 자체 Netty 리액티브 SMTP 소켓 엔진 풀스택 구축 완료.
+                10만 건 CSV 물리 파티셔닝 약 50초 실측 기록(발송 전 내부 처리) 및 자체 Netty 리액티브 SMTP 소켓 엔진 풀스택 구축 완료. 실제 발송 속도는 외부 채널 서버 상태에 따라 별도.
               </p>
             </div>
           </div>

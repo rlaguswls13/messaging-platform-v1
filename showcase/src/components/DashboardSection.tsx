@@ -249,7 +249,7 @@ export const DashboardSection: React.FC = () => {
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                 </span>
-                <span>Netty 엔진 가동: 54,200 TPS 처리 중 (큐 지연 0.0ms)</span>
+                <span>Netty 엔진 가동: 내부 전처리 2,000 TPS 처리 중 (큐 지연 0.0ms)</span>
               </div>
             </div>
           </div>
