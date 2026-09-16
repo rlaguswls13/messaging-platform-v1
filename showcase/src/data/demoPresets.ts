@@ -169,8 +169,8 @@ export const DEMO_PRESETS: PresetSample[] = [
       },
       email: {
         subject: '(광고) [초대장] 2026 AI SaaS 서밋: 온프레미스급 가상 격리 보안과 토큰 최적화',
-        previewText: '국내 최고 엔지니어들이 공개하는 2,000 TPS 내부 전처리 메시징 아키텍처 세미나에 초대합니다.',
-        bodyHtml: `<h3>2026 AI SaaS Summit VIP Invitation</h3><p>#{고객명}님, 실측 2,000 TPS 내부 전처리 파이프라인 구축 노하우를 직접 확인하세요.</p>`,
+        previewText: '국내 최고 엔지니어들이 공개하는 메시징 아키텍처 세미나에 초대합니다.',
+        bodyHtml: `<h3>2026 AI SaaS Summit VIP Invitation</h3><p>#{고객명}님, 내부 전처리 파이프라인 구축 노하우를 직접 확인하세요.</p>`,
         complianceChecked: ['DKIM/SPF 정합성 통과 규격', '전송자 정보 필수 기재', '옵트아웃(수신거부) 링크 완비'],
         tokens: 390,
         costWon: 1.2,

@@ -110,7 +110,7 @@ export const HeroSection: React.FC = () => {
               {/* Floating Stat Badge */}
               <div className="absolute -bottom-4 right-6 hidden sm:flex items-center gap-2.5 px-4 py-2.5 rounded-2xl bg-white/95 backdrop-blur-md border border-pastel-orange-200 shadow-lg text-slate-800 text-xs font-bold">
                 <span className="w-2.5 h-2.5 rounded-full bg-pastel-orange-500 animate-ping"></span>
-                <span>내부 데이터 전처리 엔진 가동 중: <strong className="text-pastel-blue-600 font-black">2,000 TPS</strong></span>
+                <span>전 채널 발송 성과 <strong className="text-pastel-blue-600 font-black">실시간 모니터링</strong> 중</span>
               </div>
             </div>
           </div>

@@ -33,7 +33,7 @@ export const Footer: React.FC = () => {
               <li><a href="#ai-demo" className="hover:text-pastel-blue-400 transition-colors">AI 템플릿 실시간 체험</a></li>
               <li><a href="#dual-ux" className="hover:text-pastel-blue-400 transition-colors">Dual-UX (Lite vs Pro)</a></li>
               <li><a href="#security" className="hover:text-pastel-blue-400 transition-colors">가상 인프라 격리 보안</a></li>
-              <li><a href="#performance" className="hover:text-pastel-blue-400 transition-colors">내부 전처리 2,000 TPS 실측 벤치마크</a></li>
+              <li><a href="#performance" className="hover:text-pastel-blue-400 transition-colors">내부 처리 실측 벤치마크</a></li>
               <li><a href="#roadmap" className="hover:text-pastel-blue-400 transition-colors">3단계 순차 채널 로드맵</a></li>
               <li><a href="#pricing" className="hover:text-pastel-orange-400 transition-colors">채널·인원별 요금표</a></li>
             </ul>

@@ -426,7 +426,7 @@ export const LiveAiDemo: React.FC = () => {
                 {/* Simulated Input bar */}
                 <div className="bg-white px-3 py-2 border-t border-slate-200 flex items-center gap-2">
                   <div className="flex-1 bg-slate-100 rounded-full px-3 py-1.5 text-[11px] text-slate-500">
-                    전송 대기 큐 적재 완료 (내부 전처리 2,000 TPS)
+                    전송 대기 큐 적재 완료
                   </div>
                   <div className="w-7 h-7 rounded-full bg-pastel-blue-600 flex items-center justify-center text-white text-xs shadow-xs">
                     ⚡
