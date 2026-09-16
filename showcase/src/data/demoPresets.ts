@@ -161,7 +161,7 @@ export const DEMO_PRESETS: PresetSample[] = [
       },
       kakaoFriendtalk: {
         title: '(광고) [OmniFlow] 2026 차세대 엔터프라이즈 SaaS 서밋 무료 초대권',
-        body: `#{고객명}님, 금융·헬스케어 엔터프라이즈를 위한 가상 인프라 격리와 2nd Brain AI 최신 기술을 공유합니다.\n\n• 선착순 50명 VIP 세션 초대\n• 세션: 온프레미스급 SaaS 보안 실전\n\n무료수신거부: 홈 > 채널차단`,
+        body: `#{고객명}님, 헬스케어·공공 엔터프라이즈를 위한 가상 인프라 격리와 2nd Brain AI 최신 기술을 공유합니다.\n\n• 선착순 50명 VIP 세션 초대\n• 세션: 온프레미스급 SaaS 보안 실전\n\n무료수신거부: 홈 > 채널차단`,
         buttonText: 'VIP 무료 초대장 등록하기',
         complianceChecked: ['(광고) 명시 준수', '080 채널 차단 링크 포함', '모바일 최적화 레이아웃'],
         tokens: 340,

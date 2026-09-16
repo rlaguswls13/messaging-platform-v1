@@ -389,7 +389,7 @@ export const PricingSection: React.FC = () => {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200">
-                  금융 / 헬스케어 / 대기업
+                  헬스케어 / 공공기관 / 대기업
                 </span>
                 <span className="text-xs text-emerald-700 font-bold flex items-center gap-1">
                   <Users className="w-3.5 h-3.5" /> 전사 무제한

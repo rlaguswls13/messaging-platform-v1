@@ -19,7 +19,7 @@ export const SecuritySection: React.FC = () => {
             <span className="text-pastel-blue-600">완벽한 가상 인프라 격리</span>로 원천 차단했습니다.
           </h2>
           <p className="text-slate-600 text-base sm:text-lg">
-            금융, 헬스케어, 대기업이 요구하는 엄격한 개인정보보호 규정(PII)을 충족하기 위해
+            헬스케어, 공공기관, 대기업이 요구하는 엄격한 개인정보보호 규정(PII)을 충족하기 위해
             테넌트별 암호키와 물리 DB 테이블을 완벽히 분리 격리하여 구축했습니다.
           </p>
         </div>
@@ -120,7 +120,7 @@ export const SecuritySection: React.FC = () => {
             <div>
               <h3 className="text-xl font-bold text-slate-900">3. 폐쇄망 온프레미스 릴레이 에이전트</h3>
               <p className="text-xs text-slate-600 mt-1.5 leading-relaxed">
-                금융기관이나 의료기관 등 인터넷망과 차단된 내부 DB를 보유한 고객사를 위해, 사내망 서버에서 1차 암호화 후 외부로 스트리밍하는 초경량 에이전트를 제공합니다.
+                의료기관이나 공공기관 등 인터넷망과 차단된 내부 DB를 보유한 고객사를 위해, 사내망 서버에서 1차 암호화 후 외부로 스트리밍하는 초경량 에이전트를 제공합니다.
               </p>
             </div>
 
