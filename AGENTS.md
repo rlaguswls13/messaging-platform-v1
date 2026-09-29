@@ -27,6 +27,7 @@ RAGWIKI = D:\obsidian-storage\project-rag\messaging-platform\
   - [05-messaging-logger (분산 로깅)](file:///D:/obsidian-storage/project-rag/messaging-platform/01-modules/05-messaging-logger/index.md)
   - [06-messaging-frontend (Next.js 16 웹 포털)](file:///D:/obsidian-storage/project-rag/messaging-platform/01-modules/06-messaging-frontend/index.md)
   - [07-messaging-common (공통 Envelope & Crypto)](file:///D:/obsidian-storage/project-rag/messaging-platform/01-modules/07-messaging-common/index.md)
+  - [09-messaging-failover (알림톡 실패 ➔ SMS/LMS 대체 발송)](file:///D:/obsidian-storage/project-rag/messaging-platform/01-modules/09-messaging-failover/index.md)
 - **[Level 3] 심층 기술 스펙 & 벤치마크**:
   - [규정 준수 2nd Brain(RAG) 연계 및 토큰 최적화 사양](file:///D:/obsidian-storage/project-rag/messaging-platform/02-architecture-and-specs/compliance-2nd-brain-ai-architecture.md)
   - [이미지·키워드 기반 멀티모달 템플릿 추천 사양](file:///D:/obsidian-storage/project-rag/messaging-platform/02-architecture-and-specs/ai-multimodal-template-selection-spec.md)
@@ -34,6 +35,8 @@ RAGWIKI = D:\obsidian-storage\project-rag\messaging-platform\
   - [순차적 채널 온보딩 파이프라인 및 모듈식 하네스(Harness) 사양](file:///D:/obsidian-storage/project-rag/messaging-platform/02-architecture-and-specs/phased-channel-pipeline-and-harness-spec.md)
   - [Ready-to-Send 페이로드 규격](file:///D:/obsidian-storage/project-rag/messaging-platform/02-architecture-and-specs/ready-to-send-payload-spec.md)
   - [10만 건 벤치마크 실측 보고서](file:///D:/obsidian-storage/project-rag/messaging-platform/02-architecture-and-specs/100k-benchmark-report.md)
+  - [3-Tier 시계열 스토리지 동적 라우팅 사양](file:///D:/obsidian-storage/project-rag/messaging-platform/02-architecture-and-specs/tiered-timeseries-storage-routing-spec.md)
+  - [Dual-UX · AI 컴플라이언스 린터 · 쿼터 사양](file:///D:/obsidian-storage/project-rag/messaging-platform/02-architecture-and-specs/dual-ux-3click-and-ai-compliance-spec.md)
 - **[Level 4] 통합 세션 아카이브**:
   - [세션 인덱스](file:///D:/obsidian-storage/project-rag/messaging-platform/03-sessions-and-history/Session_Index.md)
 
