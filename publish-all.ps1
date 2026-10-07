@@ -1,15 +1,18 @@
-﻿# ==============================================================================
+# ==============================================================================
 # Messaging Platform - All Modules Build & Private Publish Automation Script
 #
 # 2-Level Packaging: com.ma.${module-name}
 #   - Group: com.ma
 #   - Output Artifact Directory: ~/.m2/repository/com/ma/${module-name}
 #
-# Execution Order (Dependency Chain):
-#   1. messaging-payloader   : Core Messaging Envelope & Payload Validation Engine
-#   2. messaging-dispatcher  : MOM/Direct Dispatcher Engine (Depends on com.ma:messaging-payloader)
-#   3. file-processor        : Target Data Partitioning & Secure Storage
-#   4. messaging-backend     : Portal REST API Backend
+# Microservice Architecture & Execution Order:
+#   1. messaging-common      : Shared Core Library (DTO, Envelope, Enums, LogEvent, Crypto)
+#   2. messaging-targeting   : Target Data Ingestion & Physical Partitioning (CSV/XLSX/DB)
+#   3. messaging-payloader   : DB Polling, Template Interpolation & Validation Engine
+#   4. messaging-dispatcher  : Multi-channel External Dispatcher (Netty, Kakao, SMTP, Push)
+#   5. messaging-failover    : Failover Resend & Data Transformation Service (Kakao -> LMS/SMS)
+#   6. messaging-logger      : Distributed Logging System (Sub Spool/Relay & Main DB Batch Persister)
+#   7. messaging-backend     : Integrated Messaging Web Console REST API
 # ==============================================================================
 
 param(
@@ -18,11 +21,17 @@ param(
 
 $ErrorActionPreference = "Stop"
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+# If run inside messaging-platform-v1, base dir is parent (2026-project)
+if ((Split-Path -Leaf $ScriptDir) -eq "messaging-platform-v1") {
+    $BaseDir = Split-Path -Parent $ScriptDir
+} else {
+    $BaseDir = $ScriptDir
+}
 
 Write-Host "==================================================================" -ForegroundColor Cyan
-Write-Host "   🚀 Messaging Platform 4-Module 2-Level Private Publish Pipeline" -ForegroundColor Cyan
+Write-Host "   🚀 Messaging Platform 7-Module 2-Level Private Publish Pipeline" -ForegroundColor Cyan
 Write-Host "==================================================================" -ForegroundColor Cyan
-Write-Host "Base Directory : $ScriptDir" -ForegroundColor Yellow
+Write-Host "Base Directory : $BaseDir" -ForegroundColor Yellow
 Write-Host "Target Group   : com.ma" -ForegroundColor Yellow
 Write-Host "Skip Tests     : $SkipTests" -ForegroundColor Yellow
 Write-Host "Local .m2 Repo : $HOME\.m2\repository" -ForegroundColor Yellow
@@ -31,26 +40,44 @@ Write-Host ""
 
 $Modules = @(
     @{
+        Name = "messaging-common"
+        Path = Join-Path $BaseDir "messaging-common"
+        Artifact = "com\ma\messaging-common\1.0-SNAPSHOT"
+        Description = "Shared Core Library (Envelope, Metadata DTO, Enums, LogEvent, Crypto)"
+    },
+    @{
+        Name = "messaging-targeting"
+        Path = Join-Path $BaseDir "messaging-targeting"
+        Artifact = "com\ma\messaging-targeting\1.0-SNAPSHOT"
+        Description = "Target Data Ingestion & Physical Partitioning Engine"
+    },
+    @{
         Name = "messaging-payloader"
-        Path = Join-Path $ScriptDir "messaging-payloader"
+        Path = Join-Path $BaseDir "messaging-payloader"
         Artifact = "com\ma\messaging-payloader\1.0-SNAPSHOT"
-        Description = "Core Messaging Envelope & Payload Validation Engine"
+        Description = "DB Polling, Template Interpolation & Validation Engine"
     },
     @{
         Name = "messaging-dispatcher"
-        Path = Join-Path $ScriptDir "messaging-dispatcher"
+        Path = Join-Path $BaseDir "messaging-dispatcher"
         Artifact = "com\ma\messaging-dispatcher\1.0-SNAPSHOT"
-        Description = "Multi-channel MOM & Direct Dispatcher Engine"
+        Description = "Multi-channel External Dispatcher (Decoupled Microservice)"
     },
     @{
-        Name = "file-processor"
-        Path = Join-Path $ScriptDir "file-processor"
-        Artifact = "com\ma\file-processor\1.0-SNAPSHOT"
-        Description = "Target File Ingestion & Partitioning Processor"
+        Name = "messaging-failover"
+        Path = Join-Path $BaseDir "messaging-failover"
+        Artifact = "com\ma\messaging-failover\1.0-SNAPSHOT"
+        Description = "Failover Microservice (Kakao to LMS/SMS Conversion & Resend Queue)"
+    },
+    @{
+        Name = "messaging-logger"
+        Path = Join-Path $BaseDir "messaging-logger"
+        Artifact = "com\ma\messaging-logger-main\1.0-SNAPSHOT"
+        Description = "Distributed Logging System (Main Ingestion & Sub Spool/Relay)"
     },
     @{
         Name = "messaging-backend"
-        Path = Join-Path $ScriptDir "messaging-backend"
+        Path = Join-Path $BaseDir "messaging-backend"
         Artifact = "com\ma\messaging-backend\1.0-SNAPSHOT"
         Description = "Integrated Messaging Portal Backend REST API"
     }
@@ -127,7 +154,7 @@ $Results | Format-Table -AutoSize
 
 $FailedCount = ($Results | Where-Object { $_.Status -ne "SUCCESS" } | Measure-Object).Count
 if ($FailedCount -eq 0) {
-    Write-Host "🎉 All 4 modules have been successfully tested & published to Maven Local under [com/ma/*]!" -ForegroundColor Green
+    Write-Host "🎉 All 7 modules have been successfully tested & published to Maven Local under [com/ma/*]!" -ForegroundColor Green
     exit 0
 } else {
     Write-Host "⚠️ Publish pipeline completed with $FailedCount error(s)." -ForegroundColor Red
