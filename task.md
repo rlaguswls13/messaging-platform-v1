@@ -67,3 +67,19 @@
 - [x] **12. 전체 단위 테스트 및 7개 모듈 일괄 빌드/배포 검증 (`publish-all.ps1`)** (완료)
   - [x] 7개 전 모듈(`common`, `targeting`, `payloader`, `dispatcher`, `failover`, `logger`, `backend`) 100% SUCCESS
   - [x] `messaging-frontend` (Next.js 16.3.4 Turbopack) 18개 라우트 빌드 통과
+
+## Phase 6: 운영 결함 해결 및 신뢰성·컴플라이언스 고도화 (MSG-001 ~ MSG-013 전건 완료)
+- [x] **MSG-001**: 최신 세션·모듈 현황 및 다음 목표 체계화 (완료)
+- [x] **MSG-002**: DKIM 개인키 저장소 제거 및 메모리/환경변수 외부 주입 체계 구축, 키 로테이션 가이드 작성 (완료)
+- [x] **MSG-003**: `messaging-payloader` 기동 결함 수정(@Autowired 명시, 키 자동생성 방지 가드) (완료)
+- [x] **MSG-004**: `messaging-dispatcher` 결과 로그 비동기화 및 3초 타임아웃/아웃박스 즉시 폴백 (완료)
+- [x] **MSG-005**: 카카오 트리거 메타데이터(`templateCode`, `senderKey`) 및 MS 미디어(`mediaUrls`) 조립 지원 (완료)
+- [x] **MSG-006**: Flyway 마이그레이션 버전 중복(V10) 해소 및 V1~V12 순차 검증(`FlywayMigrationIntegrationTest`) (완료)
+- [x] **MSG-007**: 야간 보류 큐 24시간 만료 DLQ 격리, 08:00 스로틀링(`HeldRateLimiter`), 관측성 API 구축 (완료)
+- [x] **MSG-008**: 카카오 알림톡 광고성 등록 403 Forbidden Deny Rule 차단, BULK 도메인 야간 보류 일치화 (완료)
+- [x] **MSG-009**: Spring @Scheduled 60초 스케줄 자동 실행기 및 WEBHOOK 즉시 거부/야간 예약 사전 차단 가드 (완료)
+- [x] **MSG-010**: 테넌트 티어 연동 다중 쿼터(SOHO 300, GROWTH 10,000, ENTERPRISE 100,000), 맞춤 오버라이드 및 스토리지 장애 자동 폴백 (완료)
+- [x] **MSG-011**: 통합 빌드 스크립트(`publish-all.ps1`) 7모듈 자동 인식 파이프라인으로 최신화 (완료)
+- [x] **MSG-012**: 정보통신망법 제50조 제3항 및 시행령 제62조의2 전자우편 야간 예외 법령 근거 대조 확인 (완료)
+- [x] **MSG-013**: 페이로더 공통 봉투 컴플라이언스·대체발송 필드 누락 방지 보존 (완료)
+
