@@ -82,3 +82,6 @@
 - 타겟팅 세션: [`01-modules/02-messaging-targeting/sessions/`](../01-modules/02-messaging-targeting/sessions/)
 - 페이로더 세션: [`01-modules/03-messaging-payloader/sessions/`](../01-modules/03-messaging-payloader/sessions/)
 - 디스패처 세션: [`01-modules/04-messaging-dispatcher/sessions/`](../01-modules/04-messaging-dispatcher/sessions/)
+
+## 날짜별 세션 아카이브
+- [2026-10-09](sessions/raw/2026-10-09.md)
