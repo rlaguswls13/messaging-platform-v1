@@ -1,0 +1,334 @@
+# ==============================================================================
+# Messaging Platform Ecosystem - Podman / Docker Compose Stack
+# ==============================================================================
+# Fully orchestrates:
+#   - Infrastructure: MariaDB, Redis, ActiveMQ Classic
+#   - 7 Core Modules:
+#       1. messaging-backend    (Port 8083, context-path /api)
+#       2. messaging-targeting  (Port 8080)
+#       3. messaging-payloader  (Port 8084)
+#       4. messaging-dispatcher (Port 8081, Netty TCP 8999)
+#       5. messaging-failover   (Port 8085)
+#       6. messaging-logger     (Worker Daemon, TCP Port 9876)
+#       7. messaging-frontend   (Port 3000, Next.js 16 Web Portal)
+#   - Observability: Prometheus (Port 9090), Grafana (Port 3001)
+# ==============================================================================
+
+services:
+  # ─── 1. MariaDB ─────────────────────────────────────────────────────────────
+  mariadb:
+    image: mariadb:11.4
+    container_name: messaging-mariadb
+    restart: unless-stopped
+    ports:
+      - "${DB_PORT:-3306}:3306"
+    environment:
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root}
+      MARIADB_DATABASE: ${DB_NAME:-messagedb}
+      MARIADB_USER: ${DB_USER:-root}
+      TZ: ${TZ:-Asia/Seoul}
+    volumes:
+      - mariadb_data:/var/lib/mysql
+      - ./scripts/init-mariadb.sql:/docker-entrypoint-initdb.d/init-mariadb.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mariadb-admin ping -h localhost -uroot -p$${MARIADB_ROOT_PASSWORD:-root} || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    networks:
+      - messaging-network
+
+  # ─── 2. Redis ───────────────────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: messaging-redis
+    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - messaging-network
+
+  # ─── 3. Apache ActiveMQ Classic ─────────────────────────────────────────────
+  activemq:
+    image: apache/activemq-classic:5.18.6
+    container_name: messaging-activemq
+    restart: unless-stopped
+    ports:
+      - "${ACTIVEMQ_JMS_PORT:-61616}:61616"
+      - "${ACTIVEMQ_WEB_PORT:-8161}:8161"
+    environment:
+      ACTIVEMQ_ADMIN_LOGIN: ${ACTIVEMQ_USER:-admin}
+      ACTIVEMQ_ADMIN_PASSWORD: ${ACTIVEMQ_PASSWORD:-admin}
+      TZ: ${TZ:-Asia/Seoul}
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z localhost 61616 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    networks:
+      - messaging-network
+
+  # ─── 4. messaging-backend ───────────────────────────────────────────────────
+  messaging-backend:
+    build:
+      context: ../messaging-backend
+      dockerfile: Dockerfile
+    image: messaging-backend:1.0-SNAPSHOT
+    container_name: messaging-backend
+    restart: unless-stopped
+    ports:
+      - "${BACKEND_PORT:-8083}:8083"
+    environment:
+      DEV_MODE: ${DEV_MODE:-true}
+      APP_DEV_MODE: ${APP_DEV_MODE:-true}
+      SPRING_DATASOURCE_URL: jdbc:mariadb://mariadb:3306/messagedb?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul
+      SPRING_DATASOURCE_USERNAME: ${DB_USER:-root}
+      SPRING_DATASOURCE_PASSWORD: ${DB_ROOT_PASSWORD:-root}
+      APP_TARGETING_BASE_URL: http://messaging-targeting:8080
+      APP_PAYLOADER_BASE_URL: http://messaging-payloader:8084
+      DISPATCHER_BASE_URL: http://messaging-dispatcher:8081
+      FAILOVER_BASE_URL: http://messaging-failover:8085
+      TZ: ${TZ:-Asia/Seoul}
+    depends_on:
+      mariadb:
+        condition: service_healthy
+      activemq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8083/api/actuator/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - messaging-network
+
+  # ─── 5. messaging-targeting ─────────────────────────────────────────────────
+  messaging-targeting:
+    build:
+      context: ../messaging-targeting
+      dockerfile: Dockerfile
+    image: messaging-targeting:1.0-SNAPSHOT
+    container_name: messaging-targeting
+    restart: unless-stopped
+    ports:
+      - "${TARGETING_PORT:-8080}:8080"
+    environment:
+      DEV_MODE: ${DEV_MODE:-true}
+      APP_DEV_MODE: ${APP_DEV_MODE:-true}
+      SPRING_DATASOURCE_URL: jdbc:mysql://mariadb:3306/fileprocessor?useUnicode=true&characterEncoding=utf8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul&rewriteBatchedStatements=true&createDatabaseIfNotExist=true
+      SPRING_DATASOURCE_USERNAME: fileprocessor
+      SPRING_DATASOURCE_PASSWORD: fileprocessor
+      TZ: ${TZ:-Asia/Seoul}
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8080/v3/api-docs || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - messaging-network
+
+  # ─── 6. messaging-dispatcher ────────────────────────────────────────────────
+  messaging-dispatcher:
+    build:
+      context: ../messaging-dispatcher
+      dockerfile: Dockerfile
+    image: messaging-dispatcher:1.0-SNAPSHOT
+    container_name: messaging-dispatcher
+    restart: unless-stopped
+    ports:
+      - "${DISPATCHER_PORT:-8081}:8081"
+      - "8999:8999"
+    environment:
+      DEV_MODE: ${DEV_MODE:-true}
+      APP_DEV_MODE: ${APP_DEV_MODE:-true}
+      DISPATCHER_MOM_TYPE: activemq
+      SPRING_ACTIVEMQ_BROKER_URL: tcp://activemq:61616
+      DISPATCHER_MOM_ACTIVEMQ_BROKER_URL: tcp://activemq:61616
+      SPRING_ACTIVEMQ_USER: ${ACTIVEMQ_USER:-admin}
+      SPRING_ACTIVEMQ_PASSWORD: ${ACTIVEMQ_PASSWORD:-admin}
+      LOGGER_HOST: messaging-logger
+      LOGGER_PORT: 9876
+      ALIGO_API_KEY: ${ALIGO_API_KEY:-mock-aligo-api-key}
+      ALIGO_USER_ID: ${ALIGO_USER_ID:-mock-aligo-user}
+      ALIGO_SENDER: ${ALIGO_SENDER:-02-1234-5678}
+      COOLSMS_API_KEY: ${COOLSMS_API_KEY:-mock-coolsms-api-key}
+      COOLSMS_API_SECRET: ${COOLSMS_API_SECRET:-mock-coolsms-secret}
+      COOLSMS_SENDER: ${COOLSMS_SENDER:-02-1234-5678}
+      RCS_BRAND_ID: ${RCS_BRAND_ID:-BR-MODOO-2026}
+      RCS_CHATBOT_ID: ${RCS_CHATBOT_ID:-1588-0000}
+      RCS_API_KEY: ${RCS_API_KEY:-mock-rcs-api-key}
+      TZ: ${TZ:-Asia/Seoul}
+    depends_on:
+      activemq:
+        condition: service_healthy
+      messaging-logger:
+        condition: service_started
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8081/actuator/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - messaging-network
+
+  # ─── 7. messaging-payloader ─────────────────────────────────────────────────
+  messaging-payloader:
+    build:
+      context: ../messaging-payloader
+      dockerfile: Dockerfile
+    image: messaging-payloader:1.0-SNAPSHOT
+    container_name: messaging-payloader
+    restart: unless-stopped
+    ports:
+      - "${PAYLOADER_PORT:-8084}:8084"
+    environment:
+      DEV_MODE: ${DEV_MODE:-true}
+      APP_DEV_MODE: ${APP_DEV_MODE:-true}
+      APP_TARGETING_BASE_URL: http://messaging-targeting:8080
+      PAYLOADER_TCP_HOST: messaging-dispatcher
+      PAYLOADER_TCP_PORT: 8999
+      TZ: ${TZ:-Asia/Seoul}
+    depends_on:
+      messaging-targeting:
+        condition: service_started
+      messaging-dispatcher:
+        condition: service_started
+    networks:
+      - messaging-network
+
+  # ─── 8. messaging-failover ──────────────────────────────────────────────────
+  messaging-failover:
+    build:
+      context: ../messaging-failover
+      dockerfile: Dockerfile
+    image: messaging-failover:1.0-SNAPSHOT
+    container_name: messaging-failover
+    restart: unless-stopped
+    ports:
+      - "${FAILOVER_PORT:-8085}:8085"
+    environment:
+      DEV_MODE: ${DEV_MODE:-true}
+      APP_DEV_MODE: ${APP_DEV_MODE:-true}
+      FAILOVER_MOM_TYPE: activemq
+      ACTIVEMQ_BROKER_URL: tcp://activemq:61616
+      SPRING_ACTIVEMQ_BROKER_URL: tcp://activemq:61616
+      SPRING_ACTIVEMQ_USER: ${ACTIVEMQ_USER:-admin}
+      SPRING_ACTIVEMQ_PASSWORD: ${ACTIVEMQ_PASSWORD:-admin}
+      TZ: ${TZ:-Asia/Seoul}
+    depends_on:
+      activemq:
+        condition: service_healthy
+    networks:
+      - messaging-network
+
+  # ─── 9. messaging-logger (Worker Daemon) ────────────────────────────────────
+  messaging-logger:
+    build:
+      context: ../messaging-logger
+      dockerfile: Dockerfile
+    image: messaging-logger:1.0-SNAPSHOT
+    container_name: messaging-logger
+    restart: unless-stopped
+    environment:
+      DEV_MODE: ${DEV_MODE:-true}
+      APP_DEV_MODE: ${APP_DEV_MODE:-true}
+      LOGGER_TCP_PORT: 9876
+      LOGGER_JDBC_URL: "jdbc:h2:/app/data/logdb;DB_CLOSE_DELAY=-1;MODE=MySQL"
+      LOGGER_DB_USER: "sa"
+      LOGGER_DB_PASSWORD: ""
+      LOGGER_BATCH_SIZE: ${LOGGER_BATCH_SIZE:-1000}
+      LOGGER_FLUSH_INTERVAL_MS: ${LOGGER_FLUSH_INTERVAL_MS:-3000}
+      TZ: ${TZ:-Asia/Seoul}
+    volumes:
+      - logger_data:/app/data
+    networks:
+      - messaging-network
+
+  # ─── 10. messaging-frontend (Next.js 16 Web Portal) ─────────────────────────
+  messaging-frontend:
+    build:
+      context: ../messaging-frontend
+      dockerfile: Dockerfile
+    image: messaging-frontend:1.0-SNAPSHOT
+    container_name: messaging-frontend
+    restart: unless-stopped
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      BACKEND_URL: http://messaging-backend:8083
+      TZ: ${TZ:-Asia/Seoul}
+    depends_on:
+      messaging-backend:
+        condition: service_started
+    networks:
+      - messaging-network
+
+  # ─── 11. Prometheus ─────────────────────────────────────────────────────────
+  prometheus:
+    image: prom/prometheus:v2.54.1
+    container_name: messaging-prometheus
+    restart: unless-stopped
+    ports:
+      - "${PROMETHEUS_PORT:-9090}:9090"
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--web.console.libraries=/usr/share/prometheus/console_libraries"
+      - "--web.console.templates=/usr/share/prometheus/consoles"
+    volumes:
+      - ./scripts/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    networks:
+      - messaging-network
+
+  # ─── 12. Grafana ────────────────────────────────────────────────────────────
+  grafana:
+    image: grafana/grafana:11.2.0
+    container_name: messaging-grafana
+    restart: unless-stopped
+    ports:
+      - "${GRAFANA_PORT:-3001}:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-admin}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      TZ: ${TZ:-Asia/Seoul}
+    volumes:
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      prometheus:
+        condition: service_started
+    networks:
+      - messaging-network
+
+# ─── Networks & Volumes ───────────────────────────────────────────────────────
+networks:
+  messaging-network:
+    driver: bridge
+
+volumes:
+  mariadb_data:
+  redis_data:
+  logger_data:
+  prometheus_data:
+  grafana_data:

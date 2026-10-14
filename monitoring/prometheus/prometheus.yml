@@ -1,0 +1,90 @@
+# ==============================================================================
+# Prometheus Configuration for OmniFlow Messaging Platform
+# ==============================================================================
+global:
+  scrape_interval: 5s
+  evaluation_interval: 5s
+  scrape_timeout: 4s
+
+# Alertmanager configuration (optional / extensible)
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: []
+
+# Rule files for alerting & recording
+rule_files:
+  # - "alert_rules.yml"
+
+# ==============================================================================
+# Scrape Configurations for Microservices
+# ==============================================================================
+scrape_configs:
+  # Prometheus Self-Monitoring
+  - job_name: 'prometheus'
+    metrics_path: '/metrics'
+    scrape_interval: 5s
+    scrape_timeout: 4s
+    static_configs:
+      - targets: ['localhost:9090']
+        labels:
+          service: 'prometheus'
+          tier: 'observability'
+
+  # 1. Messaging Dispatcher (Netty TCP & Channel Dispatch Engine)
+  # - Metrics Path: /actuator/prometheus
+  # - Default Target: messaging-dispatcher:8081 (Container Network)
+  # - Host Network Fallback: host.containers.internal:8081 (Podman) or host.docker.internal:8081 (Docker)
+  - job_name: 'messaging-dispatcher'
+    metrics_path: '/actuator/prometheus'
+    scrape_interval: 5s
+    scrape_timeout: 4s
+    static_configs:
+      - targets: ['messaging-dispatcher:8081']
+        labels:
+          service: 'messaging-dispatcher'
+          tier: 'dispatch-engine'
+          env: 'production'
+
+  # 2. Messaging Backend (Admin Portal REST API & 3-Click Engine)
+  # - Context Path: /api
+  # - Metrics Path: /api/actuator/prometheus
+  # - Default Target: messaging-backend:8083 (Container Network)
+  - job_name: 'messaging-backend'
+    metrics_path: '/api/actuator/prometheus'
+    scrape_interval: 5s
+    scrape_timeout: 4s
+    static_configs:
+      - targets: ['messaging-backend:8083']
+        labels:
+          service: 'messaging-backend'
+          tier: 'portal-backend'
+          env: 'production'
+
+  # 3. Messaging Failover (Alimtalk -> SMS/LMS Fallback Engine)
+  # - Metrics Path: /actuator/prometheus
+  # - Default Target: messaging-failover:8085 (Container Network)
+  - job_name: 'messaging-failover'
+    metrics_path: '/actuator/prometheus'
+    scrape_interval: 5s
+    scrape_timeout: 4s
+    static_configs:
+      - targets: ['messaging-failover:8085']
+        labels:
+          service: 'messaging-failover'
+          tier: 'failover-engine'
+          env: 'production'
+
+  # 4. Messaging Payloader (Partition Splitting, Token Substitution & Compliance Linter)
+  # - Metrics Path: /actuator/prometheus
+  # - Default Target: messaging-payloader:8084 (Container Network)
+  - job_name: 'messaging-payloader'
+    metrics_path: '/actuator/prometheus'
+    scrape_interval: 5s
+    scrape_timeout: 4s
+    static_configs:
+      - targets: ['messaging-payloader:8084']
+        labels:
+          service: 'messaging-payloader'
+          tier: 'payloader-engine'
+          env: 'production'

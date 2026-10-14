@@ -1,0 +1,18 @@
+# ==============================================================================
+# Grafana Dashboard Provider Provisioning for OmniFlow Messaging Platform
+# ==============================================================================
+apiVersion: 1
+
+providers:
+  - name: 'messaging-platform-dashboards'
+    orgId: 1
+    folder: 'OmniFlow Messaging'
+    folderUid: 'omniflow-messaging'
+    type: file
+    disableDeletion: false
+    editable: true
+    updateIntervalSeconds: 10
+    allowUiUpdates: true
+    options:
+      path: /etc/grafana/dashboards
+      foldersFromFilesStructure: false
