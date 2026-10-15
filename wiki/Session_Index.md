@@ -92,6 +92,7 @@
 - 디스패처 세션: [`01-modules/04-messaging-dispatcher/sessions/`](../01-modules/04-messaging-dispatcher/sessions/)
 
 ## 날짜별 세션 아카이브
+- [2026-10-15](sessions/raw/2026-10-15.md)
 - [2026-10-14](sessions/raw/2026-10-14.md)
 - [2026-10-10](sessions/raw/2026-10-10.md)
 - [2026-10-09](sessions/raw/2026-10-09.md)
