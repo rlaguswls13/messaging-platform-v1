@@ -1,0 +1,17 @@
+{{- if .Values.services.targeting.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "messaging-platform.fullname" . }}-targeting
+  labels:
+    {{- include "messaging-platform.labels" (dict "context" . "service" "targeting") | nindent 4 }}
+spec:
+  type: {{ .Values.services.targeting.service.type }}
+  ports:
+    - port: {{ .Values.services.targeting.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "messaging-platform.selectorLabels" (dict "context" . "service" "targeting") | nindent 4 }}
+{{- end }}

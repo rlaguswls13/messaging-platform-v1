@@ -1,0 +1,72 @@
+{{- if .Values.services.targeting.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "messaging-platform.fullname" . }}-targeting
+  labels:
+    {{- include "messaging-platform.labels" (dict "context" . "service" "targeting") | nindent 4 }}
+spec:
+  replicas: {{ .Values.services.targeting.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "messaging-platform.selectorLabels" (dict "context" . "service" "targeting") | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "messaging-platform.selectorLabels" (dict "context" . "service" "targeting") | nindent 8 }}
+    spec:
+      containers:
+        - name: targeting
+          image: "{{ if .Values.global.image.registry }}{{ .Values.global.image.registry }}/{{ end }}{{ .Values.services.targeting.image.repository }}:{{ default .Values.global.image.tag .Values.services.targeting.image.tag }}"
+          imagePullPolicy: {{ default .Values.global.image.pullPolicy .Values.services.targeting.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.services.targeting.service.port }}
+              protocol: TCP
+          env:
+            - name: DEV_MODE
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "messaging-platform.fullname" . }}-config
+                  key: DEV_MODE
+            - name: APP_DEV_MODE
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "messaging-platform.fullname" . }}-config
+                  key: APP_DEV_MODE
+            - name: SPRING_PROFILES_ACTIVE
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "messaging-platform.fullname" . }}-config
+                  key: SPRING_PROFILES_ACTIVE
+            - name: TZ
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "messaging-platform.fullname" . }}-config
+                  key: TZ
+            - name: SPRING_DATASOURCE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "messaging-platform.fullname" . }}-config
+                  key: TARGETING_DATASOURCE_URL
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "messaging-platform.fullname" . }}-config
+                  key: DB_USER
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "messaging-platform.fullname" . }}-secret
+                  key: DB_PASSWORD
+          {{- if .Values.services.targeting.livenessProbe }}
+          livenessProbe:
+            {{- toYaml .Values.services.targeting.livenessProbe | nindent 12 }}
+          {{- end }}
+          {{- if .Values.services.targeting.readinessProbe }}
+          readinessProbe:
+            {{- toYaml .Values.services.targeting.readinessProbe | nindent 12 }}
+          {{- end }}
+          resources:
+            {{- toYaml .Values.services.targeting.resources | nindent 12 }}
+{{- end }}

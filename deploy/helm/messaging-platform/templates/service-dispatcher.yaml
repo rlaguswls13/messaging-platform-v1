@@ -1,0 +1,21 @@
+{{- if .Values.services.dispatcher.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "messaging-platform.fullname" . }}-dispatcher
+  labels:
+    {{- include "messaging-platform.labels" (dict "context" . "service" "dispatcher") | nindent 4 }}
+spec:
+  type: {{ .Values.services.dispatcher.service.type }}
+  ports:
+    - port: {{ .Values.services.dispatcher.service.httpPort }}
+      targetPort: http
+      protocol: TCP
+      name: http
+    - port: {{ .Values.services.dispatcher.service.tcpPort }}
+      targetPort: netty-tcp
+      protocol: TCP
+      name: netty-tcp
+  selector:
+    {{- include "messaging-platform.selectorLabels" (dict "context" . "service" "dispatcher") | nindent 4 }}
+{{- end }}

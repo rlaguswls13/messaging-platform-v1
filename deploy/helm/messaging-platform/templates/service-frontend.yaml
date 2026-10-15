@@ -1,0 +1,17 @@
+{{- if .Values.services.frontend.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "messaging-platform.fullname" . }}-frontend
+  labels:
+    {{- include "messaging-platform.labels" (dict "context" . "service" "frontend") | nindent 4 }}
+spec:
+  type: {{ .Values.services.frontend.service.type }}
+  ports:
+    - port: {{ .Values.services.frontend.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "messaging-platform.selectorLabels" (dict "context" . "service" "frontend") | nindent 4 }}
+{{- end }}

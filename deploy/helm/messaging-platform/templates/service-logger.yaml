@@ -1,0 +1,17 @@
+{{- if .Values.services.logger.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "messaging-platform.fullname" . }}-logger
+  labels:
+    {{- include "messaging-platform.labels" (dict "context" . "service" "logger") | nindent 4 }}
+spec:
+  type: {{ .Values.services.logger.service.type }}
+  ports:
+    - port: {{ .Values.services.logger.service.tcpPort }}
+      targetPort: tcp-logger
+      protocol: TCP
+      name: tcp-logger
+  selector:
+    {{- include "messaging-platform.selectorLabels" (dict "context" . "service" "logger") | nindent 4 }}
+{{- end }}

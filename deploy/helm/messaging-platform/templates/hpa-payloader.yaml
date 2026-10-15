@@ -1,0 +1,22 @@
+{{- if .Values.autoscaling.payloader.enabled }}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "messaging-platform.fullname" . }}-payloader
+  labels:
+    {{- include "messaging-platform.labels" (dict "context" . "service" "payloader") | nindent 4 }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "messaging-platform.fullname" . }}-payloader
+  minReplicas: {{ .Values.autoscaling.payloader.minReplicas }}
+  maxReplicas: {{ .Values.autoscaling.payloader.maxReplicas }}
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.autoscaling.payloader.targetCPUUtilizationPercentage }}
+{{- end }}

@@ -1,0 +1,51 @@
+{{- if .Values.services.frontend.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "messaging-platform.fullname" . }}-frontend
+  labels:
+    {{- include "messaging-platform.labels" (dict "context" . "service" "frontend") | nindent 4 }}
+spec:
+  replicas: {{ .Values.services.frontend.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "messaging-platform.selectorLabels" (dict "context" . "service" "frontend") | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "messaging-platform.selectorLabels" (dict "context" . "service" "frontend") | nindent 8 }}
+    spec:
+      containers:
+        - name: frontend
+          image: "{{ if .Values.global.image.registry }}{{ .Values.global.image.registry }}/{{ end }}{{ .Values.services.frontend.image.repository }}:{{ default .Values.global.image.tag .Values.services.frontend.image.tag }}"
+          imagePullPolicy: {{ default .Values.global.image.pullPolicy .Values.services.frontend.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.services.frontend.service.port }}
+              protocol: TCP
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: PORT
+              value: {{ .Values.services.frontend.service.port | quote }}
+            - name: BACKEND_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "messaging-platform.fullname" . }}-config
+                  key: BACKEND_URL
+            - name: TZ
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "messaging-platform.fullname" . }}-config
+                  key: TZ
+          {{- if .Values.services.frontend.livenessProbe }}
+          livenessProbe:
+            {{- toYaml .Values.services.frontend.livenessProbe | nindent 12 }}
+          {{- end }}
+          {{- if .Values.services.frontend.readinessProbe }}
+          readinessProbe:
+            {{- toYaml .Values.services.frontend.readinessProbe | nindent 12 }}
+          {{- end }}
+          resources:
+            {{- toYaml .Values.services.frontend.resources | nindent 12 }}
+{{- end }}

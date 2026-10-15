@@ -1,0 +1,318 @@
+# ==============================================================================
+# Enterprise Multi-channel Messaging Platform Helm Values
+# ==============================================================================
+
+global:
+  devMode: true
+  timezone: "Asia/Seoul"
+  springProfilesActive: "prod"
+  image:
+    registry: ""
+    tag: "1.0-SNAPSHOT"
+    pullPolicy: "IfNotPresent"
+
+# ─── Infrastructure Brokers & Storage ──────────────────────────────────────────
+infrastructure:
+  mariadb:
+    host: "messaging-mariadb"
+    port: 3306
+    database: "messagedb"
+    user: "root"
+    password: "rootPassword123!"
+    targetingDatabase: "fileprocessor"
+  redis:
+    host: "messaging-redis"
+    port: 6379
+  activemq:
+    host: "messaging-activemq"
+    port: 61616
+    user: "admin"
+    password: "adminPassword123!"
+
+# ─── Security & Encryption ───────────────────────────────────────────────────
+security:
+  masterKey: "MessagingPlatformAES256SecretKey2026!#"
+  jwtSecret: "SuperSecretJwtSigningKeyForMessagingPlatformV1Production2026!#"
+
+# ─── 7 Core Microservices Configuration ───────────────────────────────────────
+services:
+  # 1. messaging-backend (Port 8083, context-path /api)
+  backend:
+    enabled: true
+    replicaCount: 2
+    image:
+      repository: "messaging-backend"
+      tag: ""
+      pullPolicy: "IfNotPresent"
+    service:
+      type: ClusterIP
+      port: 8083
+    contextPath: "/api"
+    resources:
+      requests:
+        cpu: "250m"
+        memory: "512Mi"
+      limits:
+        cpu: "1000m"
+        memory: "1024Mi"
+    livenessProbe:
+      httpGet:
+        path: "/api/actuator/health"
+        port: 8083
+      initialDelaySeconds: 30
+      periodSeconds: 15
+      timeoutSeconds: 5
+      failureThreshold: 3
+    readinessProbe:
+      httpGet:
+        path: "/api/actuator/health"
+        port: 8083
+      initialDelaySeconds: 20
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 3
+
+  # 2. messaging-targeting (Port 8080)
+  targeting:
+    enabled: true
+    replicaCount: 1
+    image:
+      repository: "messaging-targeting"
+      tag: ""
+      pullPolicy: "IfNotPresent"
+    service:
+      type: ClusterIP
+      port: 8080
+    resources:
+      requests:
+        cpu: "200m"
+        memory: "512Mi"
+      limits:
+        cpu: "500m"
+        memory: "1024Mi"
+    livenessProbe:
+      httpGet:
+        path: "/v3/api-docs"
+        port: 8080
+      initialDelaySeconds: 30
+      periodSeconds: 15
+      timeoutSeconds: 5
+      failureThreshold: 3
+    readinessProbe:
+      httpGet:
+        path: "/v3/api-docs"
+        port: 8080
+      initialDelaySeconds: 20
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 3
+
+  # 3. messaging-payloader (Port 8084)
+  payloader:
+    enabled: true
+    replicaCount: 2
+    image:
+      repository: "messaging-payloader"
+      tag: ""
+      pullPolicy: "IfNotPresent"
+    service:
+      type: ClusterIP
+      port: 8084
+    resources:
+      requests:
+        cpu: "250m"
+        memory: "512Mi"
+      limits:
+        cpu: "1000m"
+        memory: "1024Mi"
+    livenessProbe:
+      httpGet:
+        path: "/actuator/health"
+        port: 8084
+      initialDelaySeconds: 30
+      periodSeconds: 15
+      timeoutSeconds: 5
+      failureThreshold: 3
+    readinessProbe:
+      httpGet:
+        path: "/actuator/health"
+        port: 8084
+      initialDelaySeconds: 20
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 3
+
+  # 4. messaging-dispatcher (Port 8081, Netty TCP 8999)
+  dispatcher:
+    enabled: true
+    replicaCount: 2
+    image:
+      repository: "messaging-dispatcher"
+      tag: ""
+      pullPolicy: "IfNotPresent"
+    service:
+      type: ClusterIP
+      httpPort: 8081
+      tcpPort: 8999
+    resources:
+      requests:
+        cpu: "500m"
+        memory: "512Mi"
+      limits:
+        cpu: "2000m"
+        memory: "2048Mi"
+    livenessProbe:
+      httpGet:
+        path: "/actuator/health"
+        port: 8081
+      initialDelaySeconds: 30
+      periodSeconds: 15
+      timeoutSeconds: 5
+      failureThreshold: 3
+    readinessProbe:
+      httpGet:
+        path: "/actuator/health"
+        port: 8081
+      initialDelaySeconds: 20
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 3
+
+  # 5. messaging-failover (Port 8085)
+  failover:
+    enabled: true
+    replicaCount: 1
+    image:
+      repository: "messaging-failover"
+      tag: ""
+      pullPolicy: "IfNotPresent"
+    service:
+      type: ClusterIP
+      port: 8085
+    resources:
+      requests:
+        cpu: "200m"
+        memory: "512Mi"
+      limits:
+        cpu: "500m"
+        memory: "1024Mi"
+    livenessProbe:
+      httpGet:
+        path: "/actuator/health"
+        port: 8085
+      initialDelaySeconds: 30
+      periodSeconds: 15
+      timeoutSeconds: 5
+      failureThreshold: 3
+    readinessProbe:
+      httpGet:
+        path: "/actuator/health"
+        port: 8085
+      initialDelaySeconds: 20
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 3
+
+  # 6. messaging-logger (Worker Daemon, TCP 9876)
+  logger:
+    enabled: true
+    replicaCount: 1
+    image:
+      repository: "messaging-logger"
+      tag: ""
+      pullPolicy: "IfNotPresent"
+    service:
+      type: ClusterIP
+      tcpPort: 9876
+    batchSize: 1000
+    flushIntervalMs: 3000
+    resources:
+      requests:
+        cpu: "150m"
+        memory: "256Mi"
+      limits:
+        cpu: "500m"
+        memory: "512Mi"
+    persistence:
+      enabled: false
+      storageClass: ""
+      size: "10Gi"
+
+  # 7. messaging-frontend (Port 3000, Next.js 16 Web Portal)
+  frontend:
+    enabled: true
+    replicaCount: 2
+    image:
+      repository: "messaging-frontend"
+      tag: ""
+      pullPolicy: "IfNotPresent"
+    service:
+      type: ClusterIP
+      port: 3000
+    resources:
+      requests:
+        cpu: "100m"
+        memory: "256Mi"
+      limits:
+        cpu: "500m"
+        memory: "512Mi"
+    livenessProbe:
+      httpGet:
+        path: "/"
+        port: 3000
+      initialDelaySeconds: 15
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 3
+    readinessProbe:
+      httpGet:
+        path: "/"
+        port: 3000
+      initialDelaySeconds: 10
+      periodSeconds: 5
+      timeoutSeconds: 5
+      failureThreshold: 3
+
+# ─── Ingress Configuration ────────────────────────────────────────────────────
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+  hosts:
+    - host: "messaging.enterprise.internal"
+      paths:
+        - path: /api
+          pathType: Prefix
+          serviceName: backend
+          servicePort: 8083
+        - path: /s
+          pathType: Prefix
+          serviceName: backend
+          servicePort: 8083
+        - path: /
+          pathType: Prefix
+          serviceName: frontend
+          servicePort: 3000
+  tls: []
+
+# ─── Horizontal Pod Autoscaling (HPA) ─────────────────────────────────────────
+autoscaling:
+  dispatcher:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+  payloader:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 8
+    targetCPUUtilizationPercentage: 75
+  backend:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 6
+    targetCPUUtilizationPercentage: 80

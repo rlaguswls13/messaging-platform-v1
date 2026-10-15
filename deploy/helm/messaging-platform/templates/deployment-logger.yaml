@@ -1,0 +1,67 @@
+{{- if .Values.services.logger.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "messaging-platform.fullname" . }}-logger
+  labels:
+    {{- include "messaging-platform.labels" (dict "context" . "service" "logger") | nindent 4 }}
+spec:
+  replicas: {{ .Values.services.logger.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "messaging-platform.selectorLabels" (dict "context" . "service" "logger") | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "messaging-platform.selectorLabels" (dict "context" . "service" "logger") | nindent 8 }}
+    spec:
+      containers:
+        - name: logger
+          image: "{{ if .Values.global.image.registry }}{{ .Values.global.image.registry }}/{{ end }}{{ .Values.services.logger.image.repository }}:{{ default .Values.global.image.tag .Values.services.logger.image.tag }}"
+          imagePullPolicy: {{ default .Values.global.image.pullPolicy .Values.services.logger.image.pullPolicy }}
+          ports:
+            - name: tcp-logger
+              containerPort: {{ .Values.services.logger.service.tcpPort }}
+              protocol: TCP
+          env:
+            - name: DEV_MODE
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "messaging-platform.fullname" . }}-config
+                  key: DEV_MODE
+            - name: APP_DEV_MODE
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "messaging-platform.fullname" . }}-config
+                  key: APP_DEV_MODE
+            - name: LOGGER_TCP_PORT
+              value: {{ .Values.services.logger.service.tcpPort | quote }}
+            - name: LOGGER_JDBC_URL
+              value: "jdbc:h2:/app/data/logdb;DB_CLOSE_DELAY=-1;MODE=MySQL"
+            - name: LOGGER_DB_USER
+              value: "sa"
+            - name: LOGGER_DB_PASSWORD
+              value: ""
+            - name: LOGGER_BATCH_SIZE
+              value: {{ .Values.services.logger.batchSize | quote }}
+            - name: LOGGER_FLUSH_INTERVAL_MS
+              value: {{ .Values.services.logger.flushIntervalMs | quote }}
+            - name: TZ
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "messaging-platform.fullname" . }}-config
+                  key: TZ
+          volumeMounts:
+            - name: logger-data
+              mountPath: /app/data
+          resources:
+            {{- toYaml .Values.services.logger.resources | nindent 12 }}
+      volumes:
+        - name: logger-data
+          {{- if .Values.services.logger.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ include "messaging-platform.fullname" . }}-logger-pvc
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+{{- end }}

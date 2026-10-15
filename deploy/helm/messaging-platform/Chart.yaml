@@ -1,0 +1,15 @@
+apiVersion: v2
+name: messaging-platform
+description: "Enterprise Multi-channel Messaging Platform v1 Production Helm Chart"
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+keywords:
+  - messaging
+  - k8s
+  - microservices
+  - enterprise
+home: "https://github.com/enterprise/messaging-platform-v1"
+maintainers:
+  - name: "DevOps & Kubernetes Engineering Team"
+    email: "devops@enterprise.internal"

@@ -1,0 +1,50 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "messaging-platform.fullname" . }}-config
+  labels:
+    {{- include "messaging-platform.labels" (dict "context" . "service" "config") | nindent 4 }}
+data:
+  SPRING_PROFILES_ACTIVE: {{ .Values.global.springProfilesActive | quote }}
+  APP_DEV_MODE: {{ .Values.global.devMode | quote }}
+  DEV_MODE: {{ .Values.global.devMode | quote }}
+  TZ: {{ .Values.global.timezone | quote }}
+  
+  # Database Configuration
+  DB_HOST: {{ .Values.infrastructure.mariadb.host | quote }}
+  DB_PORT: {{ .Values.infrastructure.mariadb.port | quote }}
+  DB_NAME: {{ .Values.infrastructure.mariadb.database | quote }}
+  DB_USER: {{ .Values.infrastructure.mariadb.user | quote }}
+  SPRING_DATASOURCE_URL: "jdbc:mariadb://{{ .Values.infrastructure.mariadb.host }}:{{ .Values.infrastructure.mariadb.port }}/{{ .Values.infrastructure.mariadb.database }}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone={{ .Values.global.timezone }}"
+  TARGETING_DATASOURCE_URL: "jdbc:mysql://{{ .Values.infrastructure.mariadb.host }}:{{ .Values.infrastructure.mariadb.port }}/{{ .Values.infrastructure.mariadb.targetingDatabase }}?useUnicode=true&characterEncoding=utf8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone={{ .Values.global.timezone }}&rewriteBatchedStatements=true&createDatabaseIfNotExist=true"
+  
+  # Redis Configuration
+  REDIS_HOST: {{ .Values.infrastructure.redis.host | quote }}
+  REDIS_PORT: {{ .Values.infrastructure.redis.port | quote }}
+  
+  # ActiveMQ Configuration
+  ACTIVEMQ_HOST: {{ .Values.infrastructure.activemq.host | quote }}
+  ACTIVEMQ_PORT: {{ .Values.infrastructure.activemq.port | quote }}
+  ACTIVEMQ_USER: {{ .Values.infrastructure.activemq.user | quote }}
+  ACTIVEMQ_BROKER_URL: "tcp://{{ .Values.infrastructure.activemq.host }}:{{ .Values.infrastructure.activemq.port }}"
+  SPRING_ACTIVEMQ_BROKER_URL: "tcp://{{ .Values.infrastructure.activemq.host }}:{{ .Values.infrastructure.activemq.port }}"
+  DISPATCHER_MOM_TYPE: "activemq"
+  DISPATCHER_MOM_ACTIVEMQ_BROKER_URL: "tcp://{{ .Values.infrastructure.activemq.host }}:{{ .Values.infrastructure.activemq.port }}"
+  FAILOVER_MOM_TYPE: "activemq"
+  
+  # Internal Service Endpoints
+  APP_TARGETING_BASE_URL: "http://{{ include "messaging-platform.fullname" . }}-targeting:{{ .Values.services.targeting.service.port }}"
+  APP_PAYLOADER_BASE_URL: "http://{{ include "messaging-platform.fullname" . }}-payloader:{{ .Values.services.payloader.service.port }}"
+  DISPATCHER_BASE_URL: "http://{{ include "messaging-platform.fullname" . }}-dispatcher:{{ .Values.services.dispatcher.service.httpPort }}"
+  FAILOVER_BASE_URL: "http://{{ include "messaging-platform.fullname" . }}-failover:{{ .Values.services.failover.service.port }}"
+  BACKEND_URL: "http://{{ include "messaging-platform.fullname" . }}-backend:{{ .Values.services.backend.service.port }}"
+  
+  # Netty TCP Pipeline Endpoints
+  PAYLOADER_TCP_HOST: "{{ include "messaging-platform.fullname" . }}-dispatcher"
+  PAYLOADER_TCP_PORT: {{ .Values.services.dispatcher.service.tcpPort | quote }}
+  LOGGER_HOST: "{{ include "messaging-platform.fullname" . }}-logger"
+  LOGGER_PORT: {{ .Values.services.logger.service.tcpPort | quote }}
+  
+  # URL Shortener Base URL
+  SHORTENER_BASE_URL: "http://messaging.enterprise.internal/s"
+  APP_SHORT_URL_BASE: "http://messaging.enterprise.internal/s"

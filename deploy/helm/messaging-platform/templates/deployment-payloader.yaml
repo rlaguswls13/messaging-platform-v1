@@ -1,0 +1,79 @@
+{{- if .Values.services.payloader.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "messaging-platform.fullname" . }}-payloader
+  labels:
+    {{- include "messaging-platform.labels" (dict "context" . "service" "payloader") | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.payloader.enabled }}
+  replicas: {{ .Values.services.payloader.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "messaging-platform.selectorLabels" (dict "context" . "service" "payloader") | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "messaging-platform.selectorLabels" (dict "context" . "service" "payloader") | nindent 8 }}
+    spec:
+      containers:
+        - name: payloader
+          image: "{{ if .Values.global.image.registry }}{{ .Values.global.image.registry }}/{{ end }}{{ .Values.services.payloader.image.repository }}:{{ default .Values.global.image.tag .Values.services.payloader.image.tag }}"
+          imagePullPolicy: {{ default .Values.global.image.pullPolicy .Values.services.payloader.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.services.payloader.service.port }}
+              protocol: TCP
+          env:
+            - name: DEV_MODE
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "messaging-platform.fullname" . }}-config
+                  key: DEV_MODE
+            - name: APP_DEV_MODE
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "messaging-platform.fullname" . }}-config
+                  key: APP_DEV_MODE
+            - name: SPRING_PROFILES_ACTIVE
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "messaging-platform.fullname" . }}-config
+                  key: SPRING_PROFILES_ACTIVE
+            - name: TZ
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "messaging-platform.fullname" . }}-config
+                  key: TZ
+            - name: APP_TARGETING_BASE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "messaging-platform.fullname" . }}-config
+                  key: APP_TARGETING_BASE_URL
+            - name: PAYLOADER_TCP_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "messaging-platform.fullname" . }}-config
+                  key: PAYLOADER_TCP_HOST
+            - name: PAYLOADER_TCP_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "messaging-platform.fullname" . }}-config
+                  key: PAYLOADER_TCP_PORT
+            - name: SECURITY_MASTER_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "messaging-platform.fullname" . }}-secret
+                  key: MASTER_KEY
+          {{- if .Values.services.payloader.livenessProbe }}
+          livenessProbe:
+            {{- toYaml .Values.services.payloader.livenessProbe | nindent 12 }}
+          {{- end }}
+          {{- if .Values.services.payloader.readinessProbe }}
+          readinessProbe:
+            {{- toYaml .Values.services.payloader.readinessProbe | nindent 12 }}
+          {{- end }}
+          resources:
+            {{- toYaml .Values.services.payloader.resources | nindent 12 }}
+{{- end }}
