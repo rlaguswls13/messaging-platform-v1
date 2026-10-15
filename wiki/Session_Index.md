@@ -7,6 +7,21 @@
 
 ## 📅 날짜별 통합 세션 아카이브
 
+- **[2026-10-15 세션 03 아카이브: 4대 핵심 백로그(W3C 분산 트레이싱, Kafka 듀얼 브로커, Helm/HPA 부하 벤치마크, B2B 웹훅 DLR) 전면 완결](file:///D:/obsidian-storage/project-rag/messaging-platform/03-sessions-and-history/2026-10-15-session-03.md)**
+  - **백로그 1**: OpenTelemetry W3C TraceContext 분산 트레이싱 파이프라인 구축 (`00-{traceId}-{spanId}-{flags}`, HTTP 필터, MOM 레코드 헤더 주입, 하네스 ChildSpan 발급, Failover 계승 전 구간 100% 검증)
+  - **백로그 2**: 카프카(Kafka) 기반 대용량 브로커 전환 및 ActiveMQ 듀얼 브로커 이중화 (`KafkaPayloaderDispatcher`, 테넌트 키 파티셔닝, `DualBrokerRouter` 런타임 핫스왑 & 장애 자동 폴백, 컨슈머 `RecordInterceptor` W3C 바인딩 100% 통과)
+  - **백로그 4**: Kubernetes Helm 배포 자동화 및 HPA 실부하 오토스케일링 E2E 실측 검증 (`deploy_helm.ps1`, 4단계 부하 시나리오 54,086 requests 무장애 실측, 파드 2➔5➔10대 자동 확장/축소, HPA v2 수학 알고리즘 무결성 100% 통과)
+  - **백로그 5**: B2B 엔터프라이즈 테넌트 전용 웹훅 (Webhook) 실시간 DLR 역발행 엔진 (Flyway V17, HMAC-SHA256 보안 서명, 비동기 지수 백오프, Next.js 16 `/admin/webhooks` 대시보드 및 25개 전 라우트 빌드 통과)
+  - **보류 항목 유지 준수**: 백로그 3 (알림톡 템플릿 심사 API) 및 백로그 6 (상용 프로덕션 실망 발송) 엄격 보류 상태 유지
+
+- **[2026-10-15 세션 02 아카이브](file:///D:/obsidian-storage/project-rag/messaging-platform/03-sessions-and-history/2026-10-15-session-02.md)**
+  - **4대 핵심 과제 순차/병렬 완결 및 무결성 전면 달성**:
+    - [1순위] 마케팅 단축 URL (Short URL) 및 실시간 클릭률(CTR) 추적 엔진 완결 (Flyway V15, Base62, 302 Found 게이트웨이, `/admin/short-urls` UI)
+    - [1순위 후속] 마케팅 A/B 테스트 발송 엔진 완결 (Flyway V16, 50:50 분할 파일럿, 실시간 CTR 판별 승자 자동 롤아웃, `/admin/ab-tests` UI)
+    - [2순위] [과제 G] AI 컴플라이언스 린터 실시간 검사 & 1-Click 안전 대안 문구 추천 완결 (위장 광고 탐지, 표시광고법 5대 위반 자동 순화, `AiComplianceModal`)
+    - [3순위] Kubernetes Helm 차트 및 HPA 오토스케일링 매니페스트 구축 완결 (7대 Deployment/Service, Ingress, HPA v2 3종, PyYAML 검증 100% 통과)
+    - [4순위] HashiCorp Vault 테넌트 KMS 키 무중단 롤링 (Zero-Downtime Key Rotation) 완결 (다중 버전 암호문, 과거/최신 동시 복호화 보장, `/api/v1/kms`)
+
 - **[2026-10-10 세션 원본](raw/2026-10-10.md)**
   - 세션 마감 정리, 중앙 정본 지식 베이스(SSOT) 7대 모듈 및 아키텍처 스펙 최종 동기화
   - Flyway V13 쿼터 영속화/컴플라이언스 체계 및 AI 멀티모달 5단계 추천 파이프라인 무결점 확정
