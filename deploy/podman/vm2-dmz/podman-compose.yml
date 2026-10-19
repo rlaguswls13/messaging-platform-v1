@@ -1,0 +1,71 @@
+# =================================================================
+# [VM-2] DMZ 영역 (Dispatcher & Telecom Outbound Tier)
+# Podman Compose 배포 매니페스트
+# 호스트 IP 예시: 192.168.20.10
+# 방화벽: 통신사 전용선(IPSec VPN), 카카오 게이트웨이, 외부 SMTP 포트 25/587만 허용
+# DB 직접 접근 원천 차단 (DB 커넥션 없음)
+# =================================================================
+version: '3.8'
+
+services:
+  # ─── 1. 초고속 Netty 멀티채널 발송 엔진 ───
+  messaging-dispatcher:
+    image: localhost/messaging-dispatcher:1.0-SNAPSHOT
+    container_name: messaging-dispatcher
+    restart: always
+    ports:
+      - "8081:8081" # 내부 관리 & Actuator 메트릭 포트
+    environment:
+      - TZ=Asia/Seoul
+      - SPRING_PROFILES_ACTIVE=prod
+      - APP_DEV_MODE=true # 상용 통신사 개통 시 false로 전환
+      
+      # ─── MOM 영역 (VM-3: 192.168.30.10) 듀얼 브로커 연결 ───
+      - MESSAGING_MOM_TYPE=kafka
+      - KAFKA_BOOTSTRAP_SERVERS=192.168.30.10:9092
+      - ACTIVEMQ_BROKER_URL=tcp://192.168.30.10:61616
+      
+      # ─── 토픽 & 큐 명세 ───
+      - MOM_QUEUE_DISPATCH_READY=messaging.dispatch.ready
+      - MOM_QUEUE_LOG_EVENTS=messaging.log.events
+      - MOM_QUEUE_FAILOVER_EVENTS=messaging.failover.events
+      
+      # ─── 통신사 Netty 소켓 연결 주소 (개발/스테이징 시 로컬 모의 소켓 연동) ───
+      - TELECOM_SMS_HOST=127.0.0.1
+      - TELECOM_SMS_PORT=9999
+      - SMTP_RELAY_HOST=127.0.0.1
+      - SMTP_RELAY_PORT=2525
+      
+      # ─── JVM 메모리 최적화 (2GB 힙 메모리) ───
+      - JAVA_TOOL_OPTIONS=-Xms1g -Xmx2g -XX:+UseG1GC -XX:MaxGCPauseMillis=20 -XX:G1ReservePercent=15
+    security_opt:
+      - label=disable
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:8081/actuator/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+    networks:
+      - dmz-net
+
+  # ─── 2. 모의 통신사 릴레이 에뮬레이터 (개발/시뮬레이션 검증용) ───
+  # 실제 상용 통신사 VPN 터널 개통 전까지 로컬 0.1ms 가상 응답 제공
+  mock-telecom-relay:
+    image: docker.io/library/eclipse-temurin:21-jre-alpine
+    container_name: mock-telecom-relay
+    restart: always
+    ports:
+      - "9999:9999" # 모의 통신사 SMS/LMS TCP 소켓
+      - "2525:2525" # 모의 SMTP 수신 소켓
+    environment:
+      - TZ=Asia/Seoul
+    command: >
+      sh -c "echo 'Mock Telecom Gateway Running on 9999 & 2525...' && nc -lk -p 9999 -e echo '0000 SUCCESS' & nc -lk -p 2525"
+    security_opt:
+      - label=disable
+    networks:
+      - dmz-net
+
+networks:
+  dmz-net:
+    driver: bridge

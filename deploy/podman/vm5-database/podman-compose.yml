@@ -1,0 +1,84 @@
+# =================================================================
+# [VM-5] 데이터베이스 & 캐시 영역 (Database & Persistence Tier)
+# Podman Compose 배포 매니페스트
+# 호스트 IP 예시: 192.168.50.10
+# 방화벽 정책: VM-4(192.168.40.10)에서만 3306, 6379 포트 인바운드 허용 (DMZ/외부망 차단)
+# =================================================================
+version: '3.8'
+
+services:
+  # ─── 1. MariaDB 11.4 LTS (엔터프라이즈 정본 RDBMS) ───
+  mariadb-server:
+    image: docker.io/library/mariadb:11.4
+    container_name: db-mariadb
+    restart: always
+    ports:
+      - "3306:3306"
+    environment:
+      - TZ=Asia/Seoul
+      - MARIADB_ROOT_PASSWORD=mariadb_root_pass
+      - MARIADB_DATABASE=messaging_db
+      - MARIADB_USER=msg_user
+      - MARIADB_PASSWORD=msg_secure_pass
+    command: >
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+      --max-connections=1000
+      --innodb-buffer-pool-size=4G
+      --innodb-log-file-size=512M
+      --innodb-flush-log-at-trx-commit=2
+      --innodb-file-per-table=1
+      --slow-query-log=1
+      --slow-query-log-file=/var/log/mysql/slow.log
+      --long-query-time=1
+    volumes:
+      - mariadb_data:/var/lib/mysql
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
+      - ./logs:/var/log/mysql
+    security_opt:
+      - label=disable
+    healthcheck:
+      test: ["CMD-SHELL", "mariadb-admin ping -h localhost -u root -pmariadb_root_pass || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    networks:
+      - db-net
+
+  # ─── 2. Redis 7.2 Alpine (분산 캐시, Token Bucket 세션 & 쿼터 속도계) ───
+  redis-server:
+    image: docker.io/library/redis:7.2-alpine
+    container_name: db-redis
+    restart: always
+    ports:
+      - "6379:6379"
+    environment:
+      - TZ=Asia/Seoul
+    command: >
+      redis-server
+      --requirepass redis_secure_pass
+      --maxmemory 2gb
+      --maxmemory-policy allkeys-lru
+      --appendonly yes
+      --save 60 1
+    volumes:
+      - redis_data:/data
+    security_opt:
+      - label=disable
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a redis_secure_pass ping | grep PONG || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    networks:
+      - db-net
+
+volumes:
+  mariadb_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  db-net:
+    driver: bridge

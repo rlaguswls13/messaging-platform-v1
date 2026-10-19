@@ -1,0 +1,131 @@
+# =================================================================
+# [VM-4] 내부 백엔드 영역 (Internal Backend & Pipeline Processing Tier)
+# Podman Compose 배포 매니페스트
+# 호스트 IP 예시: 192.168.40.10
+# 역할: 포털 코어 REST API, 데이터 타겟팅, 페이로드 개인화/압축, 웹 포털 호스팅
+# =================================================================
+version: '3.8'
+
+services:
+  # ─── 1. Next.js 16 웹 포털 프론트엔드 (포트 3000) ───
+  messaging-frontend:
+    image: localhost/messaging-frontend:1.0-SNAPSHOT
+    container_name: portal-frontend
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - TZ=Asia/Seoul
+      - NODE_ENV=production
+      - PORT=3000
+      - NEXT_PUBLIC_API_URL=http://192.168.40.10:8083/api
+    security_opt:
+      - label=disable
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:3000/ || exit 1"]
+      interval: 15s
+      timeout: 3s
+      retries: 3
+    networks:
+      - backend-net
+
+  # ─── 2. 포털 코어 REST API & RBAC & MOM 플러그인 (포트 8083) ───
+  messaging-backend:
+    image: localhost/messaging-backend:1.0-SNAPSHOT
+    container_name: portal-backend
+    restart: always
+    ports:
+      - "8083:8083"
+    environment:
+      - TZ=Asia/Seoul
+      - SPRING_PROFILES_ACTIVE=prod
+      - SERVER_PORT=8083
+      - SERVER_SERVLET_CONTEXT_PATH=/api
+      
+      # ─── DB 영역 (VM-5: 192.168.50.10) 연결 ───
+      - SPRING_DATASOURCE_URL=jdbc:mariadb://192.168.50.10:3306/messaging_db?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true
+      - SPRING_DATASOURCE_USERNAME=msg_user
+      - SPRING_DATASOURCE_PASSWORD=msg_secure_pass
+      - SPRING_FLYWAY_ENABLED=true # V1 ~ V21 자동 순차 마이그레이션 실행
+      
+      # ─── Redis 캐시 (VM-5: 192.168.50.10) 연결 ───
+      - SPRING_DATA_REDIS_HOST=192.168.50.10
+      - SPRING_DATA_REDIS_PORT=6379
+      - SPRING_DATA_REDIS_PASSWORD=redis_secure_pass
+      
+      # ─── MOM 영역 (VM-3: 192.168.30.10) 연결 ───
+      - KAFKA_BOOTSTRAP_SERVERS=192.168.30.10:9092
+      - ACTIVEMQ_BROKER_URL=tcp://192.168.30.10:61616
+      
+      # ─── JVM 메모리 최적화 ───
+      - JAVA_TOOL_OPTIONS=-Xms1g -Xmx2g -XX:+UseG1GC
+    security_opt:
+      - label=disable
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:8083/api/actuator/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+    networks:
+      - backend-net
+
+  # ─── 3. 페이로드 개인화 치환 & Zstd 무손실 압축 엔진 (포트 8084) ───
+  messaging-payloader:
+    image: localhost/messaging-payloader:1.0-SNAPSHOT
+    container_name: pipeline-payloader
+    restart: always
+    ports:
+      - "8084:8084"
+    environment:
+      - TZ=Asia/Seoul
+      - SPRING_PROFILES_ACTIVE=prod
+      - SERVER_PORT=8084
+      - SPRING_DATASOURCE_URL=jdbc:mariadb://192.168.50.10:3306/messaging_db
+      - SPRING_DATASOURCE_USERNAME=msg_user
+      - SPRING_DATASOURCE_PASSWORD=msg_secure_pass
+      
+      # ─── MOM 디스패처 설정 ───
+      - PAYLOADER_DISPATCH_MODE=kafka
+      - KAFKA_BOOTSTRAP_SERVERS=192.168.30.10:9092
+      - ACTIVEMQ_BROKER_URL=tcp://192.168.30.10:61616
+      
+      # ─── JVM 메모리 최적화 (2GB) ───
+      - JAVA_TOOL_OPTIONS=-Xms1g -Xmx2g -XX:+UseG1GC
+    security_opt:
+      - label=disable
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:8084/actuator/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+    networks:
+      - backend-net
+
+  # ─── 4. 타겟팅 대용량 파일 파서 & 블룸필터 디둡 엔진 (포트 8080) ───
+  messaging-targeting:
+    image: localhost/messaging-targeting:1.0-SNAPSHOT
+    container_name: pipeline-targeting
+    restart: always
+    ports:
+      - "8080:8080"
+    environment:
+      - TZ=Asia/Seoul
+      - SPRING_PROFILES_ACTIVE=prod
+      - SERVER_PORT=8080
+      - SPRING_DATASOURCE_URL=jdbc:mariadb://192.168.50.10:3306/messaging_db
+      - SPRING_DATASOURCE_USERNAME=msg_user
+      - SPRING_DATASOURCE_PASSWORD=msg_secure_pass
+      - JAVA_TOOL_OPTIONS=-Xms1g -Xmx2g -XX:+UseG1GC
+    security_opt:
+      - label=disable
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:8080/actuator/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+    networks:
+      - backend-net
+
+networks:
+  backend-net:
+    driver: bridge

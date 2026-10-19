@@ -1,0 +1,82 @@
+# =================================================================
+# [VM-3] MOM 영역 (Message-Oriented Middleware / Dual Broker Tier)
+# Podman Compose 배포 매니페스트
+# 호스트 IP 예시: 192.168.30.10
+# 역할: 대용량 분산 큐(Kafka) 및 보조 페일오버 큐(ActiveMQ) 듀얼 브로커 제공
+# =================================================================
+version: '3.8'
+
+services:
+  # ─── 1. Apache Kafka 3.8 (KRaft Standalone 모드 - Zookeeper 의존성 없음) ───
+  kafka-broker:
+    image: docker.io/apache/kafka:3.8.0
+    container_name: mom-kafka
+    restart: always
+    ports:
+      - "9092:9092" # 클라이언트 통신 포트
+      - "9093:9093" # 컨트롤러 쿼럼 포트
+    environment:
+      - TZ=Asia/Seoul
+      # KRaft 고유 클러스터 ID 및 노드 역할
+      - KAFKA_NODE_ID=1
+      - KAFKA_PROCESS_ROLES=broker,controller
+      - KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
+      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://192.168.30.10:9092
+      - KAFKA_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_CONTROLLER_QUORUM_VOTERS=1@192.168.30.10:9093
+      - KAFKA_INTER_BROKER_LISTENER_NAME=PLAINTEXT
+      - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1
+      - KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR=1
+      - KAFKA_TRANSACTION_STATE_LOG_MIN_ISR=1
+      - KAFKA_AUTO_CREATE_TOPICS_ENABLE=true
+      - KAFKA_NUM_PARTITIONS=4
+      - KAFKA_LOG_RETENTION_HOURS=72 # 3일 보존
+      - KAFKA_LOG_SEGMENT_BYTES=1073741824 # 1GB
+      - CLUSTER_ID=4L622nShT-2xOihttLyxKw
+      - KAFKA_HEAP_OPTS=-Xms1g -Xmx2g
+    volumes:
+      - kafka_data:/var/lib/kafka/data
+    security_opt:
+      - label=disable
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:9092 || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+    networks:
+      - mom-net
+
+  # ─── 2. Apache ActiveMQ Classic 5.18 (JMS 보조 및 페일오버 브로커) ───
+  activemq-broker:
+    image: docker.io/apache/activemq-classic:5.18.6
+    container_name: mom-activemq
+    restart: always
+    ports:
+      - "61616:61616" # OpenWire JMS 프로토콜 포트
+      - "8161:8161"   # ActiveMQ 웹 관리자 콘솔 포트
+    environment:
+      - TZ=Asia/Seoul
+      - ACTIVEMQ_ADMIN_LOGIN=admin
+      - ACTIVEMQ_ADMIN_PASSWORD=activemq_secret
+      - ACTIVEMQ_OPTS_MEMORY=-Xms512m -Xmx1g
+    volumes:
+      - activemq_data:/opt/apache-activemq/data
+    security_opt:
+      - label=disable
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z localhost 61616 || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+    networks:
+      - mom-net
+
+volumes:
+  kafka_data:
+    driver: local
+  activemq_data:
+    driver: local
+
+networks:
+  mom-net:
+    driver: bridge
