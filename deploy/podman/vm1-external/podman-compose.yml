@@ -11,8 +11,8 @@ services:
     container_name: ingress-gateway
     restart: always
     ports:
-      - "80:80"
-      - "443:443"
+      - "8000:80"
+      - "8443:443"
     environment:
       - TZ=Asia/Seoul
     volumes:
@@ -27,8 +27,8 @@ services:
       timeout: 3s
       retries: 3
     networks:
-      - external-net
+      - platform-mesh
 
 networks:
-  external-net:
-    driver: bridge
+  platform-mesh:
+    external: true

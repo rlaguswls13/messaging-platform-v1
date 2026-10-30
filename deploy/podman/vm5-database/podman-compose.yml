@@ -2,7 +2,7 @@
 # [VM-5] 데이터베이스 & 캐시 영역 (Database & Persistence Tier)
 # Podman Compose 배포 매니페스트
 # 호스트 IP 예시: 192.168.50.10
-# 방화벽 정책: VM-4(192.168.40.10)에서만 3306, 6379 포트 인바운드 허용 (DMZ/외부망 차단)
+# 방화벽 정책: VM-4(내부 백엔드)에서만 3306, 6379 포트 인바운드 허용 (DMZ/외부망 차단)
 # =================================================================
 version: '3.8'
 
@@ -23,14 +23,11 @@ services:
     command: >
       --character-set-server=utf8mb4
       --collation-server=utf8mb4_unicode_ci
-      --max-connections=1000
-      --innodb-buffer-pool-size=4G
-      --innodb-log-file-size=512M
+      --max-connections=500
+      --innodb-buffer-pool-size=512M
+      --innodb-log-file-size=256M
       --innodb-flush-log-at-trx-commit=2
       --innodb-file-per-table=1
-      --slow-query-log=1
-      --slow-query-log-file=/var/log/mysql/slow.log
-      --long-query-time=1
     volumes:
       - mariadb_data:/var/lib/mysql
       - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
@@ -43,7 +40,7 @@ services:
       timeout: 3s
       retries: 5
     networks:
-      - db-net
+      - platform-mesh
 
   # ─── 2. Redis 7.2 Alpine (분산 캐시, Token Bucket 세션 & 쿼터 속도계) ───
   redis-server:
@@ -57,7 +54,7 @@ services:
     command: >
       redis-server
       --requirepass redis_secure_pass
-      --maxmemory 2gb
+      --maxmemory 512mb
       --maxmemory-policy allkeys-lru
       --appendonly yes
       --save 60 1
@@ -71,7 +68,7 @@ services:
       timeout: 3s
       retries: 3
     networks:
-      - db-net
+      - platform-mesh
 
 volumes:
   mariadb_data:
@@ -80,5 +77,5 @@ volumes:
     driver: local
 
 networks:
-  db-net:
-    driver: bridge
+  platform-mesh:
+    external: true

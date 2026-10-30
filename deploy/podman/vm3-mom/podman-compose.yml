@@ -21,9 +21,9 @@ services:
       - KAFKA_NODE_ID=1
       - KAFKA_PROCESS_ROLES=broker,controller
       - KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
-      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://192.168.30.10:9092
+      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://mom-kafka:9092
       - KAFKA_CONTROLLER_LISTENER_NAMES=CONTROLLER
-      - KAFKA_CONTROLLER_QUORUM_VOTERS=1@192.168.30.10:9093
+      - KAFKA_CONTROLLER_QUORUM_VOTERS=1@mom-kafka:9093
       - KAFKA_INTER_BROKER_LISTENER_NAME=PLAINTEXT
       - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1
       - KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR=1
@@ -33,7 +33,7 @@ services:
       - KAFKA_LOG_RETENTION_HOURS=72 # 3일 보존
       - KAFKA_LOG_SEGMENT_BYTES=1073741824 # 1GB
       - CLUSTER_ID=4L622nShT-2xOihttLyxKw
-      - KAFKA_HEAP_OPTS=-Xms1g -Xmx2g
+      - KAFKA_HEAP_OPTS=-Xms512m -Xmx1g
     volumes:
       - kafka_data:/var/lib/kafka/data
     security_opt:
@@ -44,7 +44,7 @@ services:
       timeout: 5s
       retries: 3
     networks:
-      - mom-net
+      - platform-mesh
 
   # ─── 2. Apache ActiveMQ Classic 5.18 (JMS 보조 및 페일오버 브로커) ───
   activemq-broker:
@@ -58,7 +58,7 @@ services:
       - TZ=Asia/Seoul
       - ACTIVEMQ_ADMIN_LOGIN=admin
       - ACTIVEMQ_ADMIN_PASSWORD=activemq_secret
-      - ACTIVEMQ_OPTS_MEMORY=-Xms512m -Xmx1g
+      - ACTIVEMQ_OPTS_MEMORY=-Xms256m -Xmx512m
     volumes:
       - activemq_data:/opt/apache-activemq/data
     security_opt:
@@ -69,7 +69,7 @@ services:
       timeout: 5s
       retries: 3
     networks:
-      - mom-net
+      - platform-mesh
 
 volumes:
   kafka_data:
@@ -78,5 +78,5 @@ volumes:
     driver: local
 
 networks:
-  mom-net:
-    driver: bridge
+  platform-mesh:
+    external: true
