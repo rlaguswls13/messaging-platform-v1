@@ -1,0 +1,54 @@
+{
+  "total_records": 1000000,
+  "phases": {
+    "phase1": {
+      "duration_sec": 13.811,
+      "tps": 72407.3,
+      "ingested_records": 1000000,
+      "duplicate_filtered": 1787,
+      "mnp_terminated_filtered": 19955,
+      "mnp_suspended_filtered": 0,
+      "valid_target_count": 978258,
+      "bloom_memory_mb": 1.14,
+      "estimated_cost_saved_krw": 434840
+    },
+    "phase2": {
+      "duration_sec": 74.872,
+      "tps": 13065.8,
+      "uncompressed_mb": 431.84,
+      "compressed_mb": 375.57,
+      "compression_ratio_pct": 13.03
+    },
+    "phase3": {
+      "duration_sec": 6.251,
+      "tps": 156505.5,
+      "tier_distribution": {
+        "ENTERPRISE": 578972,
+        "GROWTH": 299470,
+        "SOHO": 99816
+      },
+      "vendor_dispatches": {
+        "KT_PRIMARY": 938321,
+        "CJ_SECONDARY_FAILOVER": 39937
+      },
+      "failed_for_failover": 29638
+    },
+    "phase4": {
+      "duration_sec": 0.004,
+      "tps": 6982848.1,
+      "converted_lms_count": 29638,
+      "compliance_retention_rate_pct": 100.0
+    },
+    "phase5": {
+      "duration_sec": 0.0,
+      "tps": 978250551117.7,
+      "storage_distribution": {
+        "MYSQL_RDB": 99816,
+        "OPENSEARCH_DOC": 299470,
+        "CLICKHOUSE_OLAP": 578972
+      }
+    }
+  },
+  "total_duration_sec": 94.94,
+  "overall_pipeline_tps": 10533.2
+}
