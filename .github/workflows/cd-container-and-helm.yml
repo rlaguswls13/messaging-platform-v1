@@ -1,0 +1,132 @@
+name: CD - Container Images (GHCR) & Helm Chart Packaging
+
+on:
+  push:
+    branches: ["main"]
+    tags:
+      - "v*.*.*"
+  workflow_dispatch:
+    inputs:
+      push_images:
+        description: "Push container images to GHCR"
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+  packages: write
+  id-token: write
+
+env:
+  REGISTRY: ghcr.io
+  CHART_PATH: deploy/helm/messaging-platform
+
+jobs:
+  helm-lint-and-package:
+    name: Helm Chart Lint, Template & Package
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: "v3.16.3"
+
+      - name: Helm Lint (Strict)
+        run: |
+          helm lint "${CHART_PATH}" --strict
+
+      - name: Helm Template Dry-Run
+        run: |
+          mkdir -p dist/rendered
+          helm template messaging-platform "${CHART_PATH}" \
+            --namespace messaging-prod \
+            > dist/rendered/messaging-platform-manifests.yaml
+          echo "Rendered $(grep -c '^kind:' dist/rendered/messaging-platform-manifests.yaml) Kubernetes resources."
+
+      - name: Package Helm Chart Artifact
+        run: |
+          mkdir -p dist/charts
+          helm package "${CHART_PATH}" --destination dist/charts
+          ls -lh dist/charts
+
+      - name: Upload Helm Chart & Rendered Manifests
+        uses: actions/upload-artifact@v4
+        with:
+          name: messaging-platform-helm-chart
+          path: |
+            dist/charts/*.tgz
+            dist/rendered/messaging-platform-manifests.yaml
+
+  build-and-push-containers:
+    name: Build & Push Container (${{ matrix.service }})
+    needs: [helm-lint-and-package]
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        service:
+          - messaging-backend
+          - messaging-targeting
+          - messaging-payloader
+          - messaging-dispatcher
+          - messaging-failover
+          - messaging-logger
+          - messaging-frontend
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Locate Service Dockerfile
+        id: locate
+        shell: bash
+        run: |
+          if [ -f "./${{ matrix.service }}/Dockerfile" ]; then
+            echo "context=./${{ matrix.service }}" >> "$GITHUB_OUTPUT"
+            echo "found=true" >> "$GITHUB_OUTPUT"
+          elif [ -f "../${{ matrix.service }}/Dockerfile" ]; then
+            echo "context=../${{ matrix.service }}" >> "$GITHUB_OUTPUT"
+            echo "found=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "found=false" >> "$GITHUB_OUTPUT"
+            echo "[INFO] Dockerfile for ${{ matrix.service }} not found in checkout; skipping build."
+          fi
+
+      - name: Set up Docker Buildx
+        if: steps.locate.outputs.found == 'true'
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry (GHCR)
+        if: steps.locate.outputs.found == 'true' && (github.event_name == 'push' || inputs.push_images == true)
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Docker Metadata
+        id: meta
+        if: steps.locate.outputs.found == 'true'
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ matrix.service }}
+          tags: |
+            type=ref,event=branch
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha,prefix=sha-
+
+      - name: Build and Push Container Image
+        if: steps.locate.outputs.found == 'true'
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ steps.locate.outputs.context }}
+          file: ${{ steps.locate.outputs.context }}/Dockerfile
+          push: ${{ github.event_name == 'push' || inputs.push_images == true }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

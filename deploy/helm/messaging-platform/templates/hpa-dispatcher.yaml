@@ -19,4 +19,25 @@ spec:
         target:
           type: Utilization
           averageUtilization: {{ .Values.autoscaling.dispatcher.targetCPUUtilizationPercentage }}
+    {{- if .Values.autoscaling.dispatcher.targetMemoryUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.autoscaling.dispatcher.targetMemoryUtilizationPercentage }}
+    {{- end }}
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+        - type: Percent
+          value: 25
+          periodSeconds: 60
+    scaleUp:
+      stabilizationWindowSeconds: 15
+      policies:
+        - type: Percent
+          value: 100
+          periodSeconds: 15
 {{- end }}

@@ -1,0 +1,157 @@
+# ==============================================================================
+# Prometheus Alerting Rules - Messaging Platform v1
+# ==============================================================================
+# Compatible with standalone Prometheus (rule_files) and kube-prometheus-stack
+# PrometheusRule CRD spec.
+# ==============================================================================
+
+groups:
+  - name: messaging-platform.dispatch-and-relay
+    interval: 15s
+    rules:
+      - alert: DispatcherTpsSuddenDrop
+        expr: |
+          (
+            sum(rate(messaging_dispatch_total[1m]))
+            < 0.4 * sum(rate(messaging_dispatch_total[15m] offset 5m))
+          )
+          and
+          (sum(rate(messaging_dispatch_total[15m] offset 5m)) > 10)
+        for: 2m
+        labels:
+          severity: critical
+          service: messaging-dispatcher
+          category: throughput
+        annotations:
+          summary: "Dispatcher TPS dropped sharply (>60% vs 15m baseline)"
+          description: "Current total dispatch TPS ({{ $value | printf \"%.1f\" }}/s) dropped by more than 60% compared to the 15-minute baseline."
+          runbook_url: "https://docs.enterprise.internal/messaging/runbooks/dispatcher-tps-drop"
+
+      - alert: RelayCircuitBreakerOpen
+        expr: |
+          resilience4j_circuitbreaker_state{state="open"} == 1
+        for: 30s
+        labels:
+          severity: critical
+          service: messaging-dispatcher
+          category: relay-resilience
+        annotations:
+          summary: "External relay Circuit Breaker OPEN ({{ $labels.name }})"
+          description: "Circuit breaker '{{ $labels.name }}' on {{ $labels.instance }} transitioned to OPEN state. Traffic is failing fast or rerouting via failover."
+          runbook_url: "https://docs.enterprise.internal/messaging/runbooks/circuit-breaker-open"
+
+      - alert: ActiveMqDlqBacklogWarning
+        expr: |
+          (sum(messaging_dlq_current) > 100)
+          or
+          (sum(activemq_queue_size{destination=~".*DLQ.*"}) > 100)
+        for: 1m
+        labels:
+          severity: warning
+          service: activemq
+          category: queue-backlog
+        annotations:
+          summary: "ActiveMQ DLQ backlog exceeded 100 messages"
+          description: "Dead Letter Queue depth is currently {{ $value | printf \"%.0f\" }} (>100 threshold). Inspect messaging-failover and relay logs."
+          runbook_url: "https://docs.enterprise.internal/messaging/runbooks/activemq-dlq"
+
+      - alert: ActiveMqDlqBacklogCritical
+        expr: |
+          (sum(messaging_dlq_current) > 500)
+          or
+          (sum(activemq_queue_size{destination=~".*DLQ.*"}) > 500)
+        for: 2m
+        labels:
+          severity: critical
+          service: activemq
+          category: queue-backlog
+        annotations:
+          summary: "ActiveMQ DLQ backlog critical (>500 messages)"
+          description: "Dead Letter Queue depth reached {{ $value | printf \"%.0f\" }} (>500 critical threshold). Immediate operator intervention required."
+          runbook_url: "https://docs.enterprise.internal/messaging/runbooks/activemq-dlq"
+
+  - name: messaging-platform.quota-and-api
+    interval: 15s
+    rules:
+      - alert: TenantQuotaWarning80
+        expr: |
+          (
+            (messaging_tenant_quota_used / clamp_min(messaging_tenant_quota_limit, 1)) * 100 >= 80
+          )
+          and
+          (
+            (messaging_tenant_quota_used / clamp_min(messaging_tenant_quota_limit, 1)) * 100 < 100
+          )
+        for: 2m
+        labels:
+          severity: warning
+          service: messaging-backend
+          category: tenant-quota
+        annotations:
+          summary: "Tenant quota usage reached >=80% ({{ $labels.tenant_id }})"
+          description: "Tenant '{{ $labels.tenant_id }}' has consumed {{ $value | printf \"%.1f\" }}% of its allocated messaging quota."
+          runbook_url: "https://docs.enterprise.internal/messaging/runbooks/tenant-quota"
+
+      - alert: TenantQuotaExhausted100
+        expr: |
+          (messaging_tenant_quota_used / clamp_min(messaging_tenant_quota_limit, 1)) * 100 >= 100
+        for: 1m
+        labels:
+          severity: critical
+          service: messaging-backend
+          category: tenant-quota
+        annotations:
+          summary: "Tenant quota EXHAUSTED (100%) for {{ $labels.tenant_id }}"
+          description: "Tenant '{{ $labels.tenant_id }}' has reached 100% quota utilization ({{ $value | printf \"%.1f\" }}%). New campaign dispatches are being throttled."
+          runbook_url: "https://docs.enterprise.internal/messaging/runbooks/tenant-quota"
+
+      - alert: Http5xxErrorRateSpike
+        expr: |
+          (
+            sum by (job) (rate(http_server_requests_seconds_count{status=~"5.."}[5m]))
+            /
+            clamp_min(sum by (job) (rate(http_server_requests_seconds_count[5m])), 0.001)
+          ) * 100 > 5
+        for: 2m
+        labels:
+          severity: critical
+          category: availability
+        annotations:
+          summary: "HTTP 5xx error rate spike on {{ $labels.job }} (>5%)"
+          description: "Service '{{ $labels.job }}' is returning {{ $value | printf \"%.2f\" }}% HTTP 5xx responses over the last 5 minutes."
+          runbook_url: "https://docs.enterprise.internal/messaging/runbooks/http-5xx-spike"
+
+  - name: messaging-platform.jvm-and-infra
+    interval: 15s
+    rules:
+      - alert: JvmHeapMemoryHigh
+        expr: |
+          (
+            sum by (job, instance) (jvm_memory_used_bytes{area="heap"})
+            /
+            clamp_min(sum by (job, instance) (jvm_memory_max_bytes{area="heap"}), 1)
+          ) * 100 > 85
+        for: 3m
+        labels:
+          severity: warning
+          category: jvm-memory
+        annotations:
+          summary: "JVM Heap memory usage >85% on {{ $labels.job }} ({{ $labels.instance }})"
+          description: "JVM heap utilization on {{ $labels.job }} ({{ $labels.instance }}) is {{ $value | printf \"%.1f\" }}% for over 3 minutes."
+          runbook_url: "https://docs.enterprise.internal/messaging/runbooks/jvm-heap-high"
+
+      - alert: DbConnectionPoolExhaustion
+        expr: |
+          (
+            hikaricp_connections_active
+            /
+            clamp_min(hikaricp_connections_max, 1)
+          ) * 100 > 85
+        for: 2m
+        labels:
+          severity: warning
+          category: database
+        annotations:
+          summary: "HikariCP DB connection pool >85% on {{ $labels.job }}"
+          description: "Active DB connections on {{ $labels.job }} ({{ $labels.pool }}) reached {{ $value | printf \"%.1f\" }}% of pool max."
+          runbook_url: "https://docs.enterprise.internal/messaging/runbooks/db-pool-exhaustion"

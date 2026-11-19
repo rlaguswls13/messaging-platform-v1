@@ -1,0 +1,100 @@
+name: Wiki Governance 8-Check Audit
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - "AGENTS.md"
+      - "wiki/**"
+      - "docs/**"
+      - "deploy/**"
+      - ".github/workflows/**"
+  pull_request:
+    branches: ["main"]
+    paths:
+      - "AGENTS.md"
+      - "wiki/**"
+      - "docs/**"
+      - "deploy/**"
+      - ".github/workflows/**"
+  workflow_dispatch:
+    inputs:
+      runner_mode:
+        description: "Runner environment (ubuntu-latest or self-hosted)"
+        required: false
+        default: "ubuntu-latest"
+        type: choice
+        options:
+          - ubuntu-latest
+          - self-hosted
+      global_wiki_root:
+        description: "Path to Central RAG Vault (ai-agent-wiki)"
+        required: false
+        default: ""
+        type: string
+      project_rag_root:
+        description: "Path to Project RAG Vault (project-rag)"
+        required: false
+        default: ""
+        type: string
+      strict_mode:
+        description: "Fail workflow if external RAG vaults are not mounted"
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  wiki-governance-audit:
+    name: 8-Check Wiki Ontology & Governance Audit
+    runs-on: ${{ inputs.runner_mode || 'ubuntu-latest' }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        if: runner.environment == 'github-hosted'
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run tools/wiki_audit.py (8 Governance Checks)
+        shell: bash
+        env:
+          GLOBAL_ROOT: ${{ inputs.global_wiki_root || vars.AI_AGENT_WIKI_ROOT || '' }}
+          PROJECT_ROOT: ${{ inputs.project_rag_root || vars.PROJECT_RAG_PATH || '' }}
+          STRICT_MODE: ${{ inputs.strict_mode || vars.WIKI_AUDIT_STRICT || 'false' }}
+        run: |
+          set -euo pipefail
+
+          AUDIT_SCRIPT=""
+          if [ -f "tools/wiki_audit.py" ]; then
+            AUDIT_SCRIPT="tools/wiki_audit.py"
+          elif [ -n "${GLOBAL_ROOT}" ] && [ -f "${GLOBAL_ROOT}/tools/wiki_audit.py" ]; then
+            AUDIT_SCRIPT="${GLOBAL_ROOT}/tools/wiki_audit.py"
+          fi
+
+          if [ -z "${GLOBAL_ROOT}" ] || [ -z "${PROJECT_ROOT}" ] || [ ! -d "${GLOBAL_ROOT}" ] || [ ! -d "${PROJECT_ROOT}" ] || [ -z "${AUDIT_SCRIPT}" ]; then
+            MSG="External RAG vaults (AI_AGENT_WIKI_ROOT / PROJECT_RAG_PATH) or tools/wiki_audit.py not mounted on this runner."
+            if [ "${STRICT_MODE}" = "true" ]; then
+              echo "::error::${MSG}"
+              exit 1
+            fi
+            echo "::notice::${MSG} Skipping 8-check audit on hosted runner. Run on self-hosted runner or locally via:"
+            echo "  python -B tools/wiki_audit.py --global-root D:/obsidian-storage/ai-agent-wiki --project-root D:/obsidian-storage/project-rag --project messaging-platform --check manifest,links,isolation,pointers,applicability,evidence-ledger,ontology,ontology-views"
+            {
+              echo "### Wiki Governance 8-Check Audit (Skipped - Vaults Not Mounted)"
+              echo "- Configure repository variables \`AI_AGENT_WIKI_ROOT\` & \`PROJECT_RAG_PATH\` on a self-hosted runner to enforce automated 8-check governance."
+            } >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          python -B "${AUDIT_SCRIPT}" \
+            --global-root "${GLOBAL_ROOT}" \
+            --project-root "${PROJECT_ROOT}" \
+            --project messaging-platform \
+            --check manifest,links,isolation,pointers,applicability,evidence-ledger,ontology,ontology-views
+
+          {
+            echo "### Wiki Governance 8-Check Audit: PASSED"
+            echo "- Checks: \`manifest, links, isolation, pointers, applicability, evidence-ledger, ontology, ontology-views\`"
+          } >> "$GITHUB_STEP_SUMMARY"

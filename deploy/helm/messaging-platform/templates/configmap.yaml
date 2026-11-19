@@ -48,3 +48,9 @@ data:
   # URL Shortener Base URL
   SHORTENER_BASE_URL: "http://messaging.enterprise.internal/s"
   APP_SHORT_URL_BASE: "http://messaging.enterprise.internal/s"
+
+  # Zero Outbound Leakage Guard (Safe Defaults)
+  ZERO_OUTBOUND_LEAKAGE_ENABLED: {{ .Values.zeroOutboundLeakage.enabled | quote }}
+  APP_OUTBOUND_BLOCK_SMTP: {{ .Values.zeroOutboundLeakage.blockExternalSmtp | quote }}
+  APP_OUTBOUND_BLOCK_PUSH: {{ .Values.zeroOutboundLeakage.blockExternalPush | quote }}
+  APP_MOCK_RELAY_ENABLED: {{ .Values.zeroOutboundLeakage.mockRelayEnabled | quote }}

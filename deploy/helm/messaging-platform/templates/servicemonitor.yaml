@@ -1,0 +1,69 @@
+{{- if .Values.serviceMonitor.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "messaging-platform.fullname" . }}-backend-sm
+  labels:
+    {{- include "messaging-platform.labels" (dict "context" . "service" "backend") | nindent 4 }}
+    release: {{ .Values.serviceMonitor.releaseLabel | quote }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "messaging-platform.selectorLabels" (dict "context" . "service" "backend") | nindent 6 }}
+  endpoints:
+    - port: http
+      path: /api/actuator/prometheus
+      interval: {{ .Values.serviceMonitor.interval | quote }}
+      scrapeTimeout: {{ .Values.serviceMonitor.scrapeTimeout | quote }}
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "messaging-platform.fullname" . }}-dispatcher-sm
+  labels:
+    {{- include "messaging-platform.labels" (dict "context" . "service" "dispatcher") | nindent 4 }}
+    release: {{ .Values.serviceMonitor.releaseLabel | quote }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "messaging-platform.selectorLabels" (dict "context" . "service" "dispatcher") | nindent 6 }}
+  endpoints:
+    - port: http
+      path: /actuator/prometheus
+      interval: {{ .Values.serviceMonitor.interval | quote }}
+      scrapeTimeout: {{ .Values.serviceMonitor.scrapeTimeout | quote }}
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "messaging-platform.fullname" . }}-payloader-sm
+  labels:
+    {{- include "messaging-platform.labels" (dict "context" . "service" "payloader") | nindent 4 }}
+    release: {{ .Values.serviceMonitor.releaseLabel | quote }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "messaging-platform.selectorLabels" (dict "context" . "service" "payloader") | nindent 6 }}
+  endpoints:
+    - port: http
+      path: /actuator/prometheus
+      interval: {{ .Values.serviceMonitor.interval | quote }}
+      scrapeTimeout: {{ .Values.serviceMonitor.scrapeTimeout | quote }}
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "messaging-platform.fullname" . }}-failover-sm
+  labels:
+    {{- include "messaging-platform.labels" (dict "context" . "service" "failover") | nindent 4 }}
+    release: {{ .Values.serviceMonitor.releaseLabel | quote }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "messaging-platform.selectorLabels" (dict "context" . "service" "failover") | nindent 6 }}
+  endpoints:
+    - port: http
+      path: /actuator/prometheus
+      interval: {{ .Values.serviceMonitor.interval | quote }}
+      scrapeTimeout: {{ .Values.serviceMonitor.scrapeTimeout | quote }}
+{{- end }}

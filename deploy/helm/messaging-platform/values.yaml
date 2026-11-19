@@ -306,13 +306,57 @@ autoscaling:
     minReplicas: 2
     maxReplicas: 10
     targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 80
   payloader:
     enabled: true
     minReplicas: 2
     maxReplicas: 8
     targetCPUUtilizationPercentage: 75
+    targetMemoryUtilizationPercentage: 80
   backend:
     enabled: true
     minReplicas: 2
     maxReplicas: 6
     targetCPUUtilizationPercentage: 80
+    targetMemoryUtilizationPercentage: 85
+
+# ─── Zero Outbound Leakage Guard (Safe Defaults) ──────────────────────────────
+zeroOutboundLeakage:
+  enabled: true
+  devMode: true
+  blockExternalSmtp: true
+  blockExternalPush: true
+  mockRelayEnabled: true
+
+# ─── NetworkPolicy (Zero-Trust Least-Privilege Pod Isolation) ─────────────────
+networkPolicy:
+  enabled: true
+  ingressNamespace: "ingress-nginx"
+  monitoringNamespace: "monitoring"
+  allowExternalEgressForDispatcher: false
+  databaseCidr: "10.0.0.0/8"
+  redisCidr: "10.0.0.0/8"
+  activemqCidr: "10.0.0.0/8"
+
+# ─── PodDisruptionBudget (Zero-Downtime Rolling Updates & Node Drains) ────────
+pdb:
+  enabled: true
+  backend:
+    enabled: true
+    minAvailable: 1
+  dispatcher:
+    enabled: true
+    minAvailable: 1
+  payloader:
+    enabled: true
+    minAvailable: 1
+  frontend:
+    enabled: true
+    minAvailable: 1
+
+# ─── Prometheus ServiceMonitor (kube-prometheus-stack Auto-Scraping) ──────────
+serviceMonitor:
+  enabled: true
+  interval: "15s"
+  scrapeTimeout: "10s"
+  releaseLabel: "kube-prometheus-stack"

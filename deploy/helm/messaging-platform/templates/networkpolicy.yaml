@@ -1,0 +1,321 @@
+{{- if .Values.networkPolicy.enabled }}
+# ─── 1. Frontend NetworkPolicy (Ingress -> Frontend -> Backend) ──────────────
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "messaging-platform.fullname" . }}-frontend-netpol
+  labels:
+    {{- include "messaging-platform.labels" (dict "context" . "service" "frontend") | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "messaging-platform.selectorLabels" (dict "context" . "service" "frontend") | nindent 6 }}
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: {{ .Values.networkPolicy.ingressNamespace | quote }}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.services.frontend.service.port }}
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              {{- include "messaging-platform.selectorLabels" (dict "context" . "service" "backend") | nindent 14 }}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.services.backend.service.port }}
+    - ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+---
+# ─── 2. Backend NetworkPolicy (Frontend/Ingress -> Backend -> DB/Redis/MQ/Core) ─
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "messaging-platform.fullname" . }}-backend-netpol
+  labels:
+    {{- include "messaging-platform.labels" (dict "context" . "service" "backend") | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "messaging-platform.selectorLabels" (dict "context" . "service" "backend") | nindent 6 }}
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              {{- include "messaging-platform.selectorLabels" (dict "context" . "service" "frontend") | nindent 14 }}
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: {{ .Values.networkPolicy.ingressNamespace | quote }}
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: {{ .Values.networkPolicy.monitoringNamespace | quote }}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.services.backend.service.port }}
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              {{- include "messaging-platform.selectorLabels" (dict "context" . "service" "targeting") | nindent 14 }}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.services.targeting.service.port }}
+    - to:
+        - podSelector:
+            matchLabels:
+              {{- include "messaging-platform.selectorLabels" (dict "context" . "service" "payloader") | nindent 14 }}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.services.payloader.service.port }}
+    - to:
+        - podSelector:
+            matchLabels:
+              {{- include "messaging-platform.selectorLabels" (dict "context" . "service" "dispatcher") | nindent 14 }}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.services.dispatcher.service.httpPort }}
+    - to:
+        - podSelector:
+            matchLabels:
+              {{- include "messaging-platform.selectorLabels" (dict "context" . "service" "failover") | nindent 14 }}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.services.failover.service.port }}
+    - to:
+        - ipBlock:
+            cidr: {{ .Values.networkPolicy.databaseCidr | quote }}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.infrastructure.mariadb.port }}
+    - to:
+        - ipBlock:
+            cidr: {{ .Values.networkPolicy.redisCidr | quote }}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.infrastructure.redis.port }}
+    - to:
+        - ipBlock:
+            cidr: {{ .Values.networkPolicy.activemqCidr | quote }}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.infrastructure.activemq.port }}
+    - ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+---
+# ─── 3. Payloader NetworkPolicy (Backend -> Payloader -> Targeting/Dispatcher/DB) ─
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "messaging-platform.fullname" . }}-payloader-netpol
+  labels:
+    {{- include "messaging-platform.labels" (dict "context" . "service" "payloader") | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "messaging-platform.selectorLabels" (dict "context" . "service" "payloader") | nindent 6 }}
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              {{- include "messaging-platform.selectorLabels" (dict "context" . "service" "backend") | nindent 14 }}
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: {{ .Values.networkPolicy.monitoringNamespace | quote }}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.services.payloader.service.port }}
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              {{- include "messaging-platform.selectorLabels" (dict "context" . "service" "targeting") | nindent 14 }}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.services.targeting.service.port }}
+    - to:
+        - podSelector:
+            matchLabels:
+              {{- include "messaging-platform.selectorLabels" (dict "context" . "service" "dispatcher") | nindent 14 }}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.services.dispatcher.service.httpPort }}
+        - protocol: TCP
+          port: {{ .Values.services.dispatcher.service.tcpPort }}
+    - to:
+        - ipBlock:
+            cidr: {{ .Values.networkPolicy.databaseCidr | quote }}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.infrastructure.mariadb.port }}
+    - to:
+        - ipBlock:
+            cidr: {{ .Values.networkPolicy.redisCidr | quote }}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.infrastructure.redis.port }}
+    - ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+---
+# ─── 4. Dispatcher NetworkPolicy (Payloader/Backend -> Dispatcher -> MQ/Logger/Egress) ─
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "messaging-platform.fullname" . }}-dispatcher-netpol
+  labels:
+    {{- include "messaging-platform.labels" (dict "context" . "service" "dispatcher") | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "messaging-platform.selectorLabels" (dict "context" . "service" "dispatcher") | nindent 6 }}
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              {{- include "messaging-platform.selectorLabels" (dict "context" . "service" "backend") | nindent 14 }}
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: {{ .Values.networkPolicy.monitoringNamespace | quote }}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.services.dispatcher.service.httpPort }}
+    - from:
+        - podSelector:
+            matchLabels:
+              {{- include "messaging-platform.selectorLabels" (dict "context" . "service" "payloader") | nindent 14 }}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.services.dispatcher.service.tcpPort }}
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              {{- include "messaging-platform.selectorLabels" (dict "context" . "service" "logger") | nindent 14 }}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.services.logger.service.tcpPort }}
+    - to:
+        - ipBlock:
+            cidr: {{ .Values.networkPolicy.activemqCidr | quote }}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.infrastructure.activemq.port }}
+    - to:
+        - ipBlock:
+            cidr: {{ .Values.networkPolicy.redisCidr | quote }}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.infrastructure.redis.port }}
+    {{- if .Values.networkPolicy.allowExternalEgressForDispatcher }}
+    # External relay egress (HTTPS 443 / SMTPS 587) - disabled by default under Zero Outbound Leakage
+    - to:
+        - ipBlock:
+            cidr: "0.0.0.0/0"
+            except:
+              - "169.254.169.254/32"
+      ports:
+        - protocol: TCP
+          port: 443
+        - protocol: TCP
+          port: 587
+    {{- end }}
+    - ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+---
+# ─── 5. Failover & Logger Internal Pipeline NetworkPolicy ─────────────────────
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "messaging-platform.fullname" . }}-failover-netpol
+  labels:
+    {{- include "messaging-platform.labels" (dict "context" . "service" "failover") | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "messaging-platform.selectorLabels" (dict "context" . "service" "failover") | nindent 6 }}
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              {{- include "messaging-platform.selectorLabels" (dict "context" . "service" "backend") | nindent 14 }}
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: {{ .Values.networkPolicy.monitoringNamespace | quote }}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.services.failover.service.port }}
+  egress:
+    - to:
+        - ipBlock:
+            cidr: {{ .Values.networkPolicy.activemqCidr | quote }}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.infrastructure.activemq.port }}
+    - ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "messaging-platform.fullname" . }}-logger-netpol
+  labels:
+    {{- include "messaging-platform.labels" (dict "context" . "service" "logger") | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "messaging-platform.selectorLabels" (dict "context" . "service" "logger") | nindent 6 }}
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              {{- include "messaging-platform.selectorLabels" (dict "context" . "service" "dispatcher") | nindent 14 }}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.services.logger.service.tcpPort }}
+  egress:
+    - to:
+        - ipBlock:
+            cidr: {{ .Values.networkPolicy.databaseCidr | quote }}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.infrastructure.mariadb.port }}
+    - ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+{{- end }}

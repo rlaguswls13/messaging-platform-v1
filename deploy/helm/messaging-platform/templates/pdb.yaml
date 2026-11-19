@@ -1,0 +1,57 @@
+{{- if .Values.pdb.enabled }}
+{{- if .Values.pdb.backend.enabled }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "messaging-platform.fullname" . }}-backend-pdb
+  labels:
+    {{- include "messaging-platform.labels" (dict "context" . "service" "backend") | nindent 4 }}
+spec:
+  minAvailable: {{ .Values.pdb.backend.minAvailable }}
+  selector:
+    matchLabels:
+      {{- include "messaging-platform.selectorLabels" (dict "context" . "service" "backend") | nindent 6 }}
+{{- end }}
+---
+{{- if .Values.pdb.dispatcher.enabled }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "messaging-platform.fullname" . }}-dispatcher-pdb
+  labels:
+    {{- include "messaging-platform.labels" (dict "context" . "service" "dispatcher") | nindent 4 }}
+spec:
+  minAvailable: {{ .Values.pdb.dispatcher.minAvailable }}
+  selector:
+    matchLabels:
+      {{- include "messaging-platform.selectorLabels" (dict "context" . "service" "dispatcher") | nindent 6 }}
+{{- end }}
+---
+{{- if .Values.pdb.payloader.enabled }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "messaging-platform.fullname" . }}-payloader-pdb
+  labels:
+    {{- include "messaging-platform.labels" (dict "context" . "service" "payloader") | nindent 4 }}
+spec:
+  minAvailable: {{ .Values.pdb.payloader.minAvailable }}
+  selector:
+    matchLabels:
+      {{- include "messaging-platform.selectorLabels" (dict "context" . "service" "payloader") | nindent 6 }}
+{{- end }}
+---
+{{- if .Values.pdb.frontend.enabled }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "messaging-platform.fullname" . }}-frontend-pdb
+  labels:
+    {{- include "messaging-platform.labels" (dict "context" . "service" "frontend") | nindent 4 }}
+spec:
+  minAvailable: {{ .Values.pdb.frontend.minAvailable }}
+  selector:
+    matchLabels:
+      {{- include "messaging-platform.selectorLabels" (dict "context" . "service" "frontend") | nindent 6 }}
+{{- end }}
+{{- end }}

@@ -1,0 +1,195 @@
+name: CI - Build, Test & E2E Verification
+
+on:
+  push:
+    branches: ["main", "develop"]
+  pull_request:
+    branches: ["main", "develop"]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DEV_MODE: "true"
+  APP_DEV_MODE: "true"
+  TZ: "Asia/Seoul"
+
+jobs:
+  java-multimodule-build:
+    name: Java 21 Multi-Module Gradle Build & Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21 (Temurin)
+        uses: actions/setup-java@v4
+        with:
+          java-version: "21"
+          distribution: "temurin"
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Build & Test 7 Java Microservices (Dependency Order)
+        shell: bash
+        run: |
+          set -euo pipefail
+          MODULES=(
+            "messaging-common"
+            "messaging-targeting"
+            "messaging-payloader"
+            "messaging-dispatcher"
+            "messaging-failover"
+            "messaging-logger"
+            "messaging-backend"
+          )
+
+          BUILT_ANY=false
+          for mod in "${MODULES[@]}"; do
+            MOD_DIR=""
+            if [ -d "./${mod}" ] && [ -f "./${mod}/gradlew" ]; then
+              MOD_DIR="./${mod}"
+            elif [ -d "../${mod}" ] && [ -f "../${mod}/gradlew" ]; then
+              MOD_DIR="../${mod}"
+            fi
+
+            if [ -n "${MOD_DIR}" ]; then
+              BUILT_ANY=true
+              echo "=== Building & testing ${mod} (${MOD_DIR}) ==="
+              (
+                cd "${MOD_DIR}"
+                chmod +x ./gradlew
+                ./gradlew test publishToMavenLocal --no-daemon -Dapp.dev-mode=true
+              )
+            else
+              echo "[INFO] Module directory '${mod}' not present in checkout; skipping."
+            fi
+          done
+
+          if [ "${BUILT_ANY}" = "false" ]; then
+            echo "[INFO] Meta-orchestration repository checkout detected (no sibling Java modules)."
+          fi
+
+      - name: Upload JUnit Test Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: junit-test-reports
+          path: "**/build/test-results/test/*.xml"
+          if-no-files-found: ignore
+
+  frontend-lint-and-build:
+    name: Next.js Frontend Lint & Production Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Lint & Build Next.js Frontend
+        shell: bash
+        run: |
+          set -euo pipefail
+          FE_DIR=""
+          if [ -d "./messaging-frontend" ] && [ -f "./messaging-frontend/package.json" ]; then
+            FE_DIR="./messaging-frontend"
+          elif [ -d "../messaging-frontend" ] && [ -f "../messaging-frontend/package.json" ]; then
+            FE_DIR="../messaging-frontend"
+          fi
+
+          if [ -n "${FE_DIR}" ]; then
+            cd "${FE_DIR}"
+            npm ci
+            npm run lint
+            npm run build
+          else
+            echo "[INFO] messaging-frontend directory not present in checkout; skipping."
+          fi
+
+  playwright-e2e:
+    name: Playwright E2E Verification
+    needs: [java-multimodule-build, frontend-lint-and-build]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Run Playwright E2E Suite
+        shell: bash
+        env:
+          CI: "true"
+          DEV_MODE: "true"
+        run: |
+          set -euo pipefail
+          FE_DIR=""
+          if [ -d "./messaging-frontend" ] && [ -f "./messaging-frontend/package.json" ]; then
+            FE_DIR="./messaging-frontend"
+          elif [ -d "../messaging-frontend" ] && [ -f "../messaging-frontend/package.json" ]; then
+            FE_DIR="../messaging-frontend"
+          fi
+
+          if [ -n "${FE_DIR}" ] && compgen -G "${FE_DIR}/playwright.config.*" > /dev/null; then
+            cd "${FE_DIR}"
+            npm ci
+            npx playwright install --with-deps chromium
+            npx playwright test --reporter=html,line
+          else
+            echo "[INFO] Playwright config not found in current checkout; skipping E2E execution."
+          fi
+
+      - name: Upload Playwright HTML Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-e2e-report
+          path: "**/playwright-report/**"
+          if-no-files-found: ignore
+
+  zero-outbound-and-config-guard:
+    name: Zero Outbound Leakage & Helm/Monitoring Guard
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Verify Zero Outbound Defaults & Monitoring Manifests
+        shell: bash
+        run: |
+          set -euo pipefail
+          pip install --quiet pyyaml
+          python3 - <<'PY'
+          import json, yaml, pathlib
+
+          values = yaml.safe_load(pathlib.Path("deploy/helm/messaging-platform/values.yaml").read_text(encoding="utf-8"))
+          assert values["global"]["devMode"] is True, "global.devMode must default to true"
+          zol = values.get("zeroOutboundLeakage", {})
+          assert zol.get("enabled") is True, "zeroOutboundLeakage.enabled must default to true"
+          assert zol.get("devMode") is True, "zeroOutboundLeakage.devMode must default to true"
+          assert values.get("networkPolicy", {}).get("allowExternalEgressForDispatcher") is False, \
+              "dispatcher external egress must be disabled by default"
+
+          alert_rules = yaml.safe_load(pathlib.Path("deploy/monitoring/prometheus/alert-rules.yml").read_text(encoding="utf-8"))
+          assert "groups" in alert_rules and len(alert_rules["groups"]) > 0
+
+          dashboard = json.loads(pathlib.Path("deploy/monitoring/grafana/dashboards/messaging-platform-overview.json").read_text(encoding="utf-8"))
+          assert "panels" in dashboard and len(dashboard["panels"]) >= 6
+
+          print("Zero Outbound Leakage & Monitoring manifests verified.")
+          PY
